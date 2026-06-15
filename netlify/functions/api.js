@@ -1,4 +1,4 @@
-const { getStore } = require('@netlify/blobs');
+const { getStore, connectLambda } = require('@netlify/blobs');
 const crypto = require('crypto');
 
 const LEVELS = {
@@ -146,6 +146,7 @@ function getPath(event) {
 
 exports.handler = async (event) => {
   try {
+    connectLambda(event);
     if (event.httpMethod === 'OPTIONS') return jsonResp(200, { ok:true });
     const path = getPath(event);
     const method = event.httpMethod;

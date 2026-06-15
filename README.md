@@ -18,3 +18,10 @@ https://你的站点.netlify.app/
 
 后台:
 https://你的站点.netlify.app/admin
+
+
+## v2 更新
+
+- 修复后台生成兑换码时报错：`The environment has not been configured to use Netlify Blobs`
+- 原因是 Netlify Functions 的 Lambda 兼容模式需要手动连接 Blobs 环境。
+- 已在函数入口加入 `connectLambda(event)`。
