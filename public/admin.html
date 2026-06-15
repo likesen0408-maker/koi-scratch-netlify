@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Koi Club 刮刮乐后台</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--pink:#f45f92;--pink2:#ff9fbe;--green:#47a447;--soft:#fff7fb;--line:#ffd2df}
+body{margin:0;background:linear-gradient(160deg,#fff1f7 0%,#f7fff2 100%);font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",Arial,sans-serif;color:#397f3b}
+.wrap{max-width:980px;margin:0 auto;padding:14px 12px 26px}
+.header{position:sticky;top:0;z-index:20;margin:-14px -12px 12px;padding:14px 12px 10px;background:linear-gradient(180deg,rgba(255,246,250,.98),rgba(255,246,250,.88));backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,179,204,.55)}
+h1{margin:0;color:var(--pink);font-size:22px;line-height:1.15;text-shadow:0 2px 0 #fff}
+.sub{font-size:12px;color:#78a66f;margin-top:4px;font-weight:800}
+.card{background:rgba(255,255,255,.94);border:1.5px solid var(--line);border-radius:20px;padding:15px;margin:12px 0;box-shadow:0 10px 24px rgba(218,91,131,.10)}
+.card h2{font-size:18px;margin:0 0 12px;color:var(--pink)}
+.card h3{font-size:15px;margin:0 0 8px;color:var(--pink)}
+.small{font-size:12px;line-height:1.55;color:#78976f;font-weight:750}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+label{display:block;font-size:13px;font-weight:900;color:#4d9950}
+input,select,button{width:100%;font:inherit;border-radius:14px;border:1.5px solid #ffc3d6;padding:12px 12px;background:#fff;color:#3f8e42;min-height:44px}
+input[type=number]{width:100%}
+button{border:0;background:linear-gradient(180deg,#ff98b8,#f45f92);color:#fff;font-weight:1000;box-shadow:0 8px 16px rgba(244,95,146,.18);cursor:pointer}
+button.green{background:linear-gradient(180deg,#74c66f,#47a447)}
+button.gray{background:linear-gradient(180deg,#aaa,#888)}
+button.light{background:linear-gradient(180deg,#fff,#edf9e8);color:var(--green);box-shadow:inset 0 0 0 1.5px rgba(115,190,101,.35)}
+.formGrid{display:grid;grid-template-columns:1fr;gap:10px}
+.settingGrid{display:grid;grid-template-columns:1fr;gap:10px}
+.settingBox{border:1px dashed #ffc8d8;border-radius:16px;padding:12px;background:#fffafd}
+.settingBox p{margin:.2em 0 .7em;font-size:12px;color:#78976f;font-weight:750}
+.notice{border-radius:16px;background:#f4fff0;border:1px solid #cceabd;padding:10px 12px;font-size:12px;color:#4a9946;line-height:1.55;font-weight:800}
+#made{margin-top:12px}
+.codeItem,.recordItem{border:1px solid #ffe0ea;border-radius:16px;background:#fff;padding:12px;margin:10px 0;box-shadow:0 6px 14px rgba(218,91,131,.06)}
+.codeTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.code{font-size:17px;font-weight:1000;color:var(--pink);letter-spacing:.045em;word-break:break-all}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:48px;padding:5px 9px;border-radius:999px;background:#edf9ed;color:#3d9240;font-weight:1000;font-size:12px;white-space:nowrap}
+.badge.used{background:#fff0f5;color:#e45a89}.badge.void{background:#eee;color:#777}.badge.expired{background:#fff5e8;color:#c67a2e}.badge.partial{background:#eef8ff;color:#4084bf}
+.meta{font-size:12px;line-height:1.7;color:#6f8e68;font-weight:800;margin-top:6px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tableWrap{display:none}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:86vw;background:rgba(57,151,65,.94);color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:900;box-shadow:0 8px 22px rgba(55,135,64,.22);opacity:0;pointer-events:none;transition:.2s;z-index:99;text-align:center}
+.toast.show{opacity:1;bottom:26px}
+a{color:var(--pink);font-weight:1000;text-decoration:none}
+@media(min-width:720px){
+  .wrap{padding:22px}
+  .header{position:static;margin:0 0 16px;padding:0;background:transparent;border:0}
+  h1{font-size:30px}
+  .formGrid{grid-template-columns:1.1fr .8fr .8fr auto auto;align-items:end}
+  .formGrid button{width:auto;min-width:120px}
+  .settingGrid{grid-template-columns:repeat(3,1fr)}
+  .tableWrap{display:block;overflow:auto}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden}
+  th,td{border-bottom:1px solid #ffe1ea;padding:10px;text-align:left;font-size:14px;white-space:nowrap}
+  th{color:var(--pink);background:#fff7fa}
+}
+
+.copyModal{position:fixed;inset:0;background:rgba(80,60,68,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:120;padding:20px}
+.copyModal.show{display:flex}
+.copyBox{width:min(92vw,420px);background:linear-gradient(180deg,#fffefa,#fff6fb);border:2px solid #ffbfd3;border-radius:22px;padding:18px;box-shadow:0 18px 40px rgba(218,91,131,.20);text-align:center}
+.copyBox h3{margin:0 0 10px;color:var(--pink);font-size:19px}
+.copyBox p{margin:6px 0 12px;color:#6e9967;font-size:13px;line-height:1.55;font-weight:800}
+.copyText{width:100%;min-height:54px;border:1.5px solid #ffc3d6;border-radius:16px;background:#fff;color:#f45f92;font-size:17px;font-weight:1000;letter-spacing:.04em;text-align:center;user-select:text;-webkit-user-select:text}
+.copyBox .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Koi Club 刮刮乐后台</h1>
+    <div class="sub">手机端后台 · 免密码进入 · 北京时间记录</div>
+  </div>
+
+  <div class="card">
+    <h2>生成兑换码</h2>
+    <div class="formGrid">
+      <label>选择档位
+        <select id="level">
+          <option value="8">8.8r / 刮8格</option>
+          <option value="15" selected>18.8r / 刮15格</option>
+          <option value="25">28.8r / 刮25格</option>
+        </select>
+      </label>
+      <label>生成几个码
+        <input id="count" type="number" min="1" max="300" value="1">
+      </label>
+      <label>每个码可刮几张
+        <input id="uses" type="number" min="1" max="999" value="1">
+      </label>
+      <button onclick="makeCodes()">生成</button>
+      <button class="light" onclick="loadAll()">刷新</button>
+    </div>
+    <p class="notice">例：生成几个码填 1，每个码可刮几张填 5 = 生成 1 个兑换码，这个码可以刮 5 张。</p>
+    <div id="made"></div>
+  </div>
+
+  <div class="card">
+    <h2>出奖概率</h2>
+    <p class="small">前端只拿到本次开奖结果，不会看到概率。大金触发后：本张卡只出 1 个大金，其余全部为空白。</p>
+    <div class="settingGrid">
+      <div class="settingBox">
+        <h3>8.8r 档</h3>
+        <p>空白 1-2；金额 150W-300W；不出大金。</p>
+        <label>大金概率 <input id="chance8" type="number" min="0" max="100" step="0.1" disabled></label>
+      </div>
+      <div class="settingBox">
+        <h3>18.8r 档</h3>
+        <p>空白 2-4；金额 350W-500W；只允许瓦当。</p>
+        <label>瓦当概率 <input id="chance15" type="number" min="0" max="100" step="0.1"></label>
+      </div>
+      <div class="settingBox">
+        <h3>28.8r 档</h3>
+        <p>空白 4-6；金额 650W-800W；允许瓦当/大剑/吞金兽。</p>
+        <label>大金概率 <input id="chance25" type="number" min="0" max="100" step="0.1"></label>
+        <div class="row" style="margin-top:8px">
+          <label>瓦当权重 <input id="w25wadang" type="number" min="0" max="999"></label>
+          <label>大剑权重 <input id="w25sword" type="number" min="0" max="999"></label>
+          <label>吞金兽权重 <input id="w25tunjin" type="number" min="0" max="999"></label>
+        </div>
+      </div>
+    </div>
+    <p><button onclick="saveSettings()">保存概率设置</button></p>
+  </div>
+
+  <div class="card">
+    <h2>兑换码列表</h2>
+    <div id="codesCards"></div>
+    <div class="tableWrap"><table id="codesTable"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>兑换记录</h2>
+    <div id="redeemsCards"></div>
+    <div class="tableWrap"><table id="redeemsTable"></table></div>
+  </div>
+</div>
+
+<div class="copyModal" id="copyModal">
+  <div class="copyBox">
+    <h3>手动复制兑换码</h3>
+    <p>当前浏览器不允许自动复制，请长按下面内容复制。</p>
+    <textarea class="copyText" id="copyManualText" readonly></textarea>
+    <div class="actions">
+      <button class="green" onclick="selectManualCopy()">选中内容</button>
+      <button class="gray" onclick="closeCopyModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+let token='no-password';
+localStorage.setItem('koi_admin_token', token);
+
+function showToast(t){
+  const el=document.getElementById('toast');
+  el.textContent=t;
+  el.classList.add('show');
+  clearTimeout(window._toast);
+  window._toast=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+async function api(url,opt={}){
+  opt.headers=Object.assign({'Content-Type':'application/json'},opt.headers||{});
+  if(token) opt.headers.Authorization='Bearer '+token;
+  try{
+    const res=await fetch(url,opt);
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||'请求失败');
+    return data;
+  }catch(e){
+    const msg=/Load failed|Failed to fetch|NetworkError/i.test(e.message||'')?'连接后端失败，请确认服务正在运行':(e.message||'请求失败');
+    throw new Error(msg);
+  }
+}
+
+function statusText(s){
+  return {unused:'未使用',partial:'部分已刮',used:'已用完',void:'已作废',expired:'已过期'}[s] || s || '未知';
+}
+function statusCls(s){return s==='used'?'used':s==='void'?'void':s==='expired'?'expired':s==='partial'?'partial':''}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function fmt(t){return t?new Date(t).toLocaleString('zh-CN',{hour12:false}):''}
+function fmtB(t,b){return b||fmt(t)}
+function modeText(r){return r.summary || (r.mode==='item' ? '大金奖励：'+(r.itemName||r.item||'')+'；其余空白' : '金额：'+(r.totalExpected||0)+'W / 空白'+(r.blankCount||0));}
+
+async function loadSettings(){
+  const data=await api('/api/admin/settings');
+  const s=data.settings;
+  document.getElementById('chance8').value=s.itemChance["8"];
+  document.getElementById('chance15').value=s.itemChance["15"];
+  document.getElementById('chance25').value=s.itemChance["25"];
+  document.getElementById('w25wadang').value=s.itemWeights["25"].wadang;
+  document.getElementById('w25sword').value=s.itemWeights["25"].sword;
+  document.getElementById('w25tunjin').value=s.itemWeights["25"].tunjin;
+}
+
+async function saveSettings(){
+  try{
+    const settings={
+      itemChance:{
+        "8":0,
+        "15":Number(document.getElementById('chance15').value)||0,
+        "25":Number(document.getElementById('chance25').value)||0
+      },
+      itemWeights:{
+        "15":{wadang:100},
+        "25":{
+          wadang:Number(document.getElementById('w25wadang').value)||0,
+          sword:Number(document.getElementById('w25sword').value)||0,
+          tunjin:Number(document.getElementById('w25tunjin').value)||0
+        }
+      }
+    };
+    await api('/api/admin/settings',{method:'POST',body:JSON.stringify({settings})});
+    showToast('概率设置已保存');
+    loadSettings();
+  }catch(e){showToast(e.message)}
+}
+
+async function makeCodes(){
+  try{
+    const body={
+      level:+document.getElementById('level').value,
+      count:+document.getElementById('count').value,
+      uses:+document.getElementById('uses').value
+    };
+    const data=await api('/api/admin/codes',{method:'POST',body:JSON.stringify(body)});
+    document.getElementById('made').innerHTML='<h3>本次生成</h3>'+data.codes.map(c=>`
+      <div class="codeItem">
+        <div class="codeTop"><div class="code">${escapeHtml(c.code)}</div><span class="badge">${statusText(c.status)}</span></div>
+        <div class="meta">${c.price}｜刮${c.limit}格｜可刮 ${c.totalTickets} 张｜已刮 ${c.usedTickets} 张</div>
+        <div class="actions"><button class="green" onclick="copyText('${c.code}')">复制兑换码</button><button class="light" onclick="copyText('${location.origin}/?code=${c.code}')">复制链接</button></div>
+      </div>`).join('');
+    showToast('兑换码已生成');
+    loadAll();
+  }catch(e){showToast(e.message)}
+}
+
+async function copyText(t){
+  const text=String(t||'');
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+      showToast('已复制');
+      return;
+    }
+  }catch(_){}
+
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text;
+    ta.setAttribute('readonly','');
+    ta.style.position='fixed';
+    ta.style.left='-9999px';
+    ta.style.top='0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok){showToast('已复制');return;}
+  }catch(_){}
+
+  openCopyModal(text);
+}
+
+function openCopyModal(t){
+  const modal=document.getElementById('copyModal');
+  const ta=document.getElementById('copyManualText');
+  ta.value=t;
+  modal.classList.add('show');
+  setTimeout(()=>selectManualCopy(),80);
+  showToast('请长按内容复制');
+}
+
+function closeCopyModal(){
+  document.getElementById('copyModal').classList.remove('show');
+}
+
+function selectManualCopy(){
+  const ta=document.getElementById('copyManualText');
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+}
+
+async function voidCode(code){
+  if(!confirm('确定作废这个兑换码吗？')) return;
+  try{
+    await api('/api/admin/codes/void',{method:'POST',body:JSON.stringify({code})});
+    showToast('兑换码已作废');
+    loadAll();
+  }catch(e){showToast(e.message)}
+}
+
+function renderCodeCard(c){
+  return `<div class="codeItem">
+    <div class="codeTop"><div class="code">${escapeHtml(c.code)}</div><span class="badge ${statusCls(c.status)}">${statusText(c.status)}</span></div>
+    <div class="meta">档位：${c.price} / 刮${c.limit}格<br>刮卡：${c.usedTickets}/${c.totalTickets} 张<br>过期：${fmtB(c.expiresAt,c.expiresAtBeijing)}</div>
+    <div class="actions"><button class="green" onclick="copyText('${c.code}')">复制</button><button class="gray" onclick="voidCode('${c.code}')">作废</button></div>
+  </div>`;
+}
+function renderRedeemCard(r){
+  return `<div class="recordItem">
+    <div class="codeTop"><div class="code">${escapeHtml(r.code)}</div><span class="badge">${r.price}</span></div>
+    <div class="meta">时间：${fmtB(r.redeemedAt,r.redeemedAtBeijing)}<br>档位：${r.price} / 刮${r.limit}格<br>结果：${escapeHtml(modeText(r))}</div>
+  </div>`;
+}
+
+async function loadAll(){
+  try{
+    await loadSettings();
+    const [codes,redeems]=await Promise.all([api('/api/admin/codes'),api('/api/admin/redeems')]);
+    document.getElementById('codesCards').innerHTML=codes.codes.length?codes.codes.map(renderCodeCard).join(''):'<p class="small">暂无兑换码。</p>';
+    document.getElementById('redeemsCards').innerHTML=redeems.redeems.length?redeems.redeems.map(renderRedeemCard).join(''):'<p class="small">暂无兑换记录。</p>';
+
+    document.getElementById('codesTable').innerHTML='<tr><th>兑换码</th><th>档位</th><th>状态</th><th>使用次数</th><th>过期时间</th><th>操作</th></tr>'+
+      codes.codes.map(c=>`<tr><td class="code">${escapeHtml(c.code)}</td><td>${c.price} / 刮${c.limit}格</td><td><span class="badge ${statusCls(c.status)}">${statusText(c.status)}</span></td><td>${c.usedTickets}/${c.totalTickets}</td><td>${fmtB(c.expiresAt,c.expiresAtBeijing)}</td><td><button class="green" onclick="copyText('${c.code}')">复制</button> <button class="gray" onclick="voidCode('${c.code}')">作废</button></td></tr>`).join('');
+
+    document.getElementById('redeemsTable').innerHTML='<tr><th>北京时间</th><th>兑换码</th><th>档位</th><th>结果</th></tr>'+
+      redeems.redeems.map(r=>`<tr><td>${fmtB(r.redeemedAt,r.redeemedAtBeijing)}</td><td class="code">${escapeHtml(r.code)}</td><td>${r.price} / 刮${r.limit}格</td><td>${escapeHtml(modeText(r))}</td></tr>`).join('');
+  }catch(e){showToast(e.message)}
+}
+
+loadAll();
+</script>
+</body>
+</html>

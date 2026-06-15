@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Koi Club · LUCKY KOI 刮刮乐</title>
+<style>
+  :root{
+    --stage-w:min(100vw, calc((100vh - 8px) * 9 / 16), 760px);
+    --pink:#f35f91;--pink2:#ff8aad;--green:#45984a;--mint:#eaffef;--deep:#e74f82;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:linear-gradient(90deg,#f4cbd8 0,#ffeef4 18%,#fff8fa 50%,#ffeef4 82%,#f4cbd8 100%);font-family:"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+  body{display:flex;align-items:center;justify-content:center;padding:0}
+  .stage{position:relative;width:var(--stage-w);height:min(100vh, calc(var(--stage-w)*16/9));overflow:hidden;background:#fff;box-shadow:0 18px 56px rgba(211,79,125,.18)}
+  .stage img{display:block;pointer-events:none}
+  .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .logo{position:absolute;left:7.4%;top:1.0%;width:30.5%;height:auto;z-index:3;filter:drop-shadow(0 3px 5px rgba(194,83,116,.14))}
+  .topbtn{display:none !important;position:absolute;top:1.45%;width:9.6%;height:auto;z-index:4;filter:drop-shadow(0 4px 8px rgba(230,86,126,.14));pointer-events:none;cursor:default}
+  .act{right:14.2%}.rule{right:4.8%}
+  .title{position:absolute;left:13.6%;top:6.0%;width:73%;height:auto;z-index:3;filter:drop-shadow(0 8px 10px rgba(229,88,128,.2))}
+  .mainKoi{position:absolute;left:7.7%;top:20.0%;width:18.8%;height:auto;z-index:4;filter:drop-shadow(0 5px 8px rgba(68,157,82,.16))}
+  .badge{position:absolute;right:4.4%;top:19.1%;width:24.4%;height:auto;z-index:4;filter:drop-shadow(0 5px 8px rgba(229,88,128,.16))}
+  .ribbon{position:absolute;left:21.8%;top:26.3%;width:56.5%;height:auto;z-index:5;filter:drop-shadow(0 4px 7px rgba(230,91,130,.14))}
+  .tagline{position:absolute;left:22.2%;top:30.25%;width:55.8%;height:3.1%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,248,250,.86));border:1.5px solid rgba(255,160,188,.46);display:flex;align-items:center;justify-content:center;gap:.3em;color:#4d9f4c;font-weight:900;font-size:calc(var(--stage-w)*.0225);letter-spacing:.01em;box-shadow:0 4px 10px rgba(241,120,160,.08);z-index:6;white-space:nowrap;padding:0 .55em}
+  .tagline b{font-size:1.06em;color:#438e43}
+  .miniClover,.status .c{display:none}
+  .statusRow{position:absolute;left:23.4%;top:33.4%;width:53.2%;height:3.35%;display:flex;gap:2.4%;z-index:9}
+  .status{height:100%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,248,250,.94));border:1.5px solid rgba(255,134,169,.65);box-shadow:0 4px 10px rgba(231,78,126,.08);display:flex;align-items:center;justify-content:center;white-space:nowrap;color:var(--green);font-weight:900;font-size:calc(var(--stage-w)*.024);line-height:1;min-width:0;padding:0 .55em}
+  .status.tier{flex:1.05}.status.count{flex:.95}
+  .status .c{margin-right:.16em}
+  .status strong{color:var(--pink);font-weight:950;margin-left:.18em}
+  .panel{position:absolute;left:10.2%;top:34.9%;width:79.6%;aspect-ratio:1177/1104;z-index:4}
+  .panelImg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0}
+  .grid{position:absolute;left:7.65%;top:8.45%;width:84.75%;height:82.8%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:2.1%;z-index:2}
+  .tile{position:relative;overflow:hidden;border-radius:18%;background:rgba(255,247,248,.72);box-shadow:inset 0 0 0 1px rgba(255,150,180,.12)}
+  .prize{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background-image:var(--tileBg);background-size:100% 100%;background-repeat:no-repeat;color:var(--pink);font-weight:950;line-height:1;overflow:hidden;padding:6% 4%}
+  .prize.prizeCard{background:none;padding:0;display:flex;align-items:center;justify-content:center}.prize.prizeCard::before{content:'';position:absolute;inset:4%;border-radius:16%;pointer-events:none}
+  .rewardCard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;height:88%;object-fit:contain;object-position:center center;border-radius:14%;filter:drop-shadow(0 2px 3px rgba(173,116,120,.10));}
+  .amt{font-size:calc(var(--stage-w)*.0275);letter-spacing:-.018em;text-shadow:0 1px 0 #fff,0 1.5px 0 rgba(255,255,255,.78);white-space:nowrap;max-width:96%;transform:translateX(-.01em)}
+  .amt.green{color:var(--green)}
+  .unit{font-size:calc(var(--stage-w)*.0108);letter-spacing:0;color:inherit;margin-top:.22em;text-shadow:0 1px 0 rgba(255,255,255,.88);white-space:nowrap}
+  .tileIcon{width:31%;height:31%;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(221,90,134,.14));margin-bottom:2%}
+  .tileIcon.koi{width:42%;height:42%}.tileIcon.sword{width:41%;height:47%}.tileIcon.cup{width:42%;height:45%}.tileIcon.clover{width:34%;height:34%}
+  .iconLabel{font-size:calc(var(--stage-w)*.0116);line-height:1.05;color:var(--pink);font-weight:950;text-shadow:0 1px 0 rgba(255,255,255,.92);white-space:nowrap}
+  .iconLabel.green{color:var(--green)}
+  .cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;pointer-events:none;transition:opacity .24s ease,transform .24s ease;filter:drop-shadow(0 1px 1px rgba(90,90,90,.08))}
+  .tile.revealed .cover{opacity:0;transform:scale(.965)}
+  .luckyTag{position:absolute;right:-7.0%;top:39.5%;width:11.5%;height:auto;z-index:5;filter:drop-shadow(0 4px 8px rgba(219,85,123,.16))}
+  .summary{position:absolute;left:9.7%;top:77.4%;width:80.6%;height:4.35%;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 8px 16px rgba(206,91,126,.11);display:flex;align-items:center;justify-content:space-between;padding:0 7.0% 0 6.4%;z-index:10;border:1px solid rgba(255,255,255,.95)}
+  .summary .left{display:flex;align-items:baseline;gap:.26em;white-space:nowrap;min-width:0}
+  .summary .label{font-size:calc(var(--stage-w)*.021);font-weight:950;color:var(--green);text-shadow:0 1px 0 #fff}
+  .summary .num{font-size:calc(var(--stage-w)*.034);font-weight:950;color:var(--pink);letter-spacing:-.02em;text-shadow:0 2px 0 #fff}
+  .summary .right{font-size:calc(var(--stage-w)*.0148);line-height:1.05;text-align:right;color:var(--green);font-weight:900;white-space:nowrap}
+  .options{position:absolute;left:8.0%;top:82.2%;width:84.0%;height:5.2%;display:flex;gap:4.2%;z-index:11}
+  .opt{position:relative;flex:1;border:0;background:transparent;padding:0;cursor:pointer}
+  .opt img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(201,86,121,.10));pointer-events:none}
+  .opt.active::after{display:none}
+  .mainBtn{position:absolute;left:25.7%;top:88.15%;width:48.6%;height:5.25%;z-index:13;border:0;background:transparent;padding:0;cursor:pointer;filter:drop-shadow(0 7px 11px rgba(226,86,129,.18))}
+  .mainBtn img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+  .summary .toolTip{display:block}
+  .againBtn{display:none;border:0;border-radius:999px;background:linear-gradient(180deg,#fff,#eefbe8);color:#48a843;font-size:calc(var(--stage-w)*.018);font-weight:950;box-shadow:0 4px 10px rgba(73,152,64,.13),inset 0 0 0 1px rgba(93,178,76,.32);padding:.35em .8em;line-height:1;cursor:pointer;white-space:nowrap}
+  .againBtn:active{transform:scale(.96)}
+  .stage.finished .summary .toolTip{display:none}
+  .stage.finished .summary .againBtn{display:inline-flex;align-items:center;justify-content:center}
+  .hint{display:none}
+  .nav{position:absolute;left:5.8%;bottom:0.7%;width:88.4%;height:5.95%;z-index:12;pointer-events:auto}
+  .navBg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+  .navIcon{position:absolute;top:2%;height:96%;object-fit:contain;filter:drop-shadow(0 3px 5px rgba(121,163,111,.11));transition:transform .18s ease, filter .18s ease;transform-origin:center 75%}
+  .navHome{left:3.5%;width:20%}.navScratch{left:30.2%;width:17%}.navRecord{left:54.3%;width:15.5%}.navMine{right:3.6%;width:19%}
+  .navActive{display:none}
+  .toast{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);background:rgba(57,151,65,.93);color:#fff;border-radius:999px;padding:.62em 1em;font-size:calc(var(--stage-w)*.022);font-weight:900;z-index:80;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 6px 18px rgba(55,135,64,.23);white-space:nowrap}
+  .toast.show{opacity:1;bottom:10.5%}
+  .modal{position:absolute;inset:0;background:rgba(255,220,230,.55);backdrop-filter:blur(5px);z-index:90;display:none;align-items:center;justify-content:center;padding:8%}
+  .modal.show{display:flex}
+  .modalBox{width:86%;border-radius:24px;background:rgba(255,255,255,.97);border:2px solid rgba(255,136,173,.52);padding:7% 6%;box-shadow:0 16px 40px rgba(212,85,124,.2);color:#4b9b48}
+  .modalBox h3{margin:0 0 .55em;text-align:center;color:var(--pink);font-size:calc(var(--stage-w)*.042)}
+  .modalBox p{font-size:calc(var(--stage-w)*.025);line-height:1.65;margin:.35em 0;font-weight:800}
+  .modalBox button{margin:1em auto 0;display:block;border:0;border-radius:999px;background:linear-gradient(#ff8dae,#f65e91);color:white;font-size:calc(var(--stage-w)*.029);font-weight:900;padding:.7em 2.25em;box-shadow:0 8px 15px rgba(236,82,129,.22)}
+
+  button:focus,.opt:focus,.mainBtn:focus{outline:none}
+  .opt img,.mainBtn,.topbtn{transition:transform .16s ease, filter .16s ease, opacity .16s ease}
+  .opt.active img{transform:translateY(-2px) scale(1.025);filter:drop-shadow(0 8px 14px rgba(238,96,138,.18)) brightness(1.035)}
+  .opt:active img,.mainBtn:active,.topbtn:active{transform:scale(.965)}
+  .navHit{position:absolute;top:0;bottom:0;border:0;background:transparent;padding:0;z-index:5;cursor:pointer;border-radius:18px;-webkit-tap-highlight-color:transparent;outline:none}
+  .navHit:active{background:transparent}
+  .navHit.home{left:1.5%;width:22%}.navHit.scratch{left:26.5%;width:22%}.navHit.record{left:51.2%;width:20%}.navHit.mine{right:1.5%;width:22%}
+  .stage.locked .tile{pointer-events:none}
+  .tile.pop{animation:koiPop .18s ease-out}
+  @keyframes koiPop{from{transform:scale(.94)}to{transform:scale(1)}}
+
+  .navHit:focus,.navHit:focus-visible{outline:none;box-shadow:none}
+  .navIcon.is-active{transform:translateY(-2px) scale(1.08);filter:drop-shadow(0 5px 10px rgba(121,163,111,.18))}
+  .navIcon.tap{animation:navTap .2s ease}
+  @keyframes navTap{0%{transform:scale(.96)}60%{transform:scale(1.1)}100%{transform:scale(1.04)}}
+
+  .prizePage{
+    position:absolute;
+    inset:0;
+    z-index:70;
+    display:none;
+    background:#f7dce7;
+  }
+  .prizePage.show{display:block}
+  .prizePage img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .stage.prize-mode .tagline,
+  .stage.prize-mode .statusRow,
+  .stage.prize-mode .panel,
+  .stage.prize-mode .summary,
+  .stage.prize-mode .options,
+  .stage.prize-mode .mainBtn,
+  .stage.prize-mode .hint,
+  .stage.prize-mode .toast{
+    display:none !important;
+  }
+  .stage.prize-mode .nav{
+    z-index:90;
+  }
+  .stage.prize-mode .nav{
+    z-index:120;
+  }
+  .stage.prize-mode .navBg,
+  .stage.prize-mode .navIcon{
+    opacity:1 !important;
+  }
+  .stage.prize-mode .navActive{
+    display:none !important;
+  }
+  .stage.prize-mode .navHit{
+    background:transparent !important;
+  }
+
+  .stage.prize-mode .nav::before{
+    content:'';
+    position:absolute;
+    left:-2%;
+    right:-2%;
+    top:-8%;
+    bottom:-8%;
+    border-radius:999px;
+    background:linear-gradient(180deg,rgba(238,255,228,.82),rgba(255,255,245,.94));
+    filter:blur(.2px);
+    z-index:-1;
+  }
+
+
+  .tile{touch-action:none;user-select:none;-webkit-user-select:none}
+  .scratchCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:4;border-radius:18%;touch-action:none;cursor:pointer;transition:opacity .26s ease,transform .26s ease;filter:drop-shadow(0 1px 1px rgba(90,90,90,.08))}
+  .tile.revealed .scratchCanvas{opacity:0;transform:scale(.965);pointer-events:none}
+  .rewardModal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(133,108,115,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;z-index:80;transition:opacity .24s ease}
+  .rewardModal.show{opacity:1;pointer-events:auto}
+  .rewardBox{position:relative;width:min(82%,calc(var(--stage-w)*.78));background:linear-gradient(180deg,#fffef9 0%,#fff8fb 100%);border:3px solid rgba(247,183,200,.92);border-radius:28px;box-shadow:0 16px 40px rgba(191,138,155,.22), inset 0 2px 0 rgba(255,255,255,.85);padding:7% 7% 6%;text-align:center;overflow:hidden}
+  .rewardBox:before{content:'';position:absolute;left:5%;right:5%;top:10px;height:10px;border-radius:999px;background:linear-gradient(90deg,rgba(255,209,220,0),rgba(255,209,220,.9),rgba(255,209,220,0));filter:blur(.4px)}
+  .rewardClover{width:calc(var(--stage-w)*.07);height:calc(var(--stage-w)*.07);margin:0 auto 2%;background-image:url("");}
+  .rewardTitle{font-size:calc(var(--stage-w)*.044);line-height:1.2;font-weight:950;color:var(--pink);text-shadow:0 2px 0 rgba(255,255,255,.95)}
+  .rewardLevel{margin-top:2.5%;font-size:calc(var(--stage-w)*.0175);font-weight:800;color:var(--green);letter-spacing:.02em}
+  .rewardAmount{margin-top:4%;font-size:calc(var(--stage-w)*.07);line-height:1;font-weight:1000;color:var(--pink);text-shadow:0 2px 0 #fff,0 5px 16px rgba(238,139,170,.18)}
+  .rewardSub{margin-top:2%;font-size:calc(var(--stage-w)*.018);font-weight:850;color:#9a8f74}
+  .rewardTools{margin-top:4%;padding:4.5% 5%;border-radius:20px;background:linear-gradient(180deg,rgba(240,252,240,.9),rgba(255,250,246,.95));box-shadow:inset 0 0 0 1px rgba(170,213,153,.45);font-size:calc(var(--stage-w)*.0175);line-height:1.55;color:#7a7a66;font-weight:750}
+  .rewardTools strong{color:var(--green)}
+  .rewardNote{margin-top:3%;font-size:calc(var(--stage-w)*.016);line-height:1.45;color:#b38c92;font-weight:700}
+  .rewardActions{display:flex;gap:3.6%;margin-top:5%}
+  .rewardBtn{flex:1;border:0;border-radius:999px;padding:4.2% 0;font-size:calc(var(--stage-w)*.022);font-weight:950;letter-spacing:.02em;cursor:pointer;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;box-shadow:0 8px 18px rgba(214,170,182,.18)}
+  .rewardBtn:active{transform:scale(.97)}
+  .rewardBtn.secondary{background:linear-gradient(180deg,#f4f8ee 0%,#e6f1dc 100%);color:var(--green);box-shadow:inset 0 0 0 2px rgba(171,214,146,.45),0 8px 18px rgba(171,214,146,.16)}
+  .rewardBtn.primary{background:linear-gradient(180deg,#ffd7e1 0%,#ffbcd0 100%);color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 10px 20px rgba(238,158,184,.24)}
+
+  .redeemLayer{position:absolute;inset:0;z-index:84;display:flex;align-items:center;justify-content:center;background:rgba(255,235,243,.58);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+  .redeemBox{position:relative;width:78%;border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,248,251,.95));border:2px solid rgba(255,143,177,.62);box-shadow:0 18px 46px rgba(218,91,131,.23),inset 0 2px 0 rgba(255,255,255,.88);padding:7.2% 6.2% 6%;text-align:center;overflow:hidden}
+  .redeemBox:before{content:'';position:absolute;left:8%;right:8%;top:9px;height:9px;border-radius:999px;background:linear-gradient(90deg,rgba(255,210,224,0),rgba(255,210,224,.9),rgba(255,210,224,0))}
+  .redeemTitle{font-size:calc(var(--stage-w)*.043);font-weight:950;color:var(--pink);text-shadow:0 2px 0 #fff;margin-bottom:2.2%}
+  .redeemDesc{font-size:calc(var(--stage-w)*.019);line-height:1.45;color:var(--green);font-weight:850;margin-bottom:4%}
+  .redeemInput{width:100%;height:calc(var(--stage-w)*.085);border-radius:999px;border:2px solid rgba(255,137,172,.65);background:rgba(255,255,255,.98);box-shadow:inset 0 3px 9px rgba(229,91,135,.08);outline:none;text-align:center;color:var(--pink);font-size:calc(var(--stage-w)*.029);font-weight:950;letter-spacing:.04em;padding:0 1em;text-transform:uppercase}
+  .redeemInput::placeholder{color:#eaa3ba}
+  .redeemButton{margin-top:4%;width:100%;height:calc(var(--stage-w)*.084);border:0;border-radius:999px;background:linear-gradient(180deg,#ffd1dd 0%,#ff82a8 47%,#f45f92 100%);color:#fff;font-size:calc(var(--stage-w)*.03);font-weight:950;letter-spacing:.03em;box-shadow:0 9px 18px rgba(235,91,135,.22),inset 0 2px 0 rgba(255,255,255,.5);cursor:pointer;transition:transform .16s ease,filter .16s ease}
+  .redeemButton:active{transform:scale(.97)}
+  .redeemMsg{display:none;margin-top:3%;border-radius:14px;padding:.7em .8em;background:rgba(255,240,246,.96);border:1px solid rgba(255,125,164,.42);color:#f05f92;font-size:calc(var(--stage-w)*.0205);font-weight:950;line-height:1.35;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+  .redeemMsg.show{display:block}
+  .redeemMsg.ok{background:rgba(239,251,232,.96);border-color:rgba(91,176,76,.35);color:#48a843}
+  .redeemTip{margin-top:3.8%;font-size:calc(var(--stage-w)*.0165);line-height:1.45;color:#95a772;font-weight:800}
+  .stage.locked .tile,.stage.locked .mainBtn{pointer-events:none;filter:saturate(.82)}
+  .stage.locked .options{pointer-events:none;opacity:.78}
+
+  .roundBtn{display:none !important}
+  #btnActivity,#btnRules,.topbtn.act,.topbtn.rule{display:none !important;opacity:0 !important;pointer-events:none !important;visibility:hidden !important}
+  #luckyTag,.luckyTag{display:none !important;opacity:0 !important;visibility:hidden !important;pointer-events:none !important}
+  .blankPrize{background:rgba(255,250,252,.45);box-shadow:inset 0 0 0 1px rgba(255,200,214,.18)}
+  .blankCard{width:101% !important;height:101% !important;object-fit:contain !important;}
+  /* v43 奖励弹窗可爱化 */
+  .rewardBox{
+    width:min(84%,calc(var(--stage-w)*.80)) !important;
+    border-radius:32px !important;
+    border:3px solid rgba(255,174,201,.95) !important;
+    background:
+      radial-gradient(circle at 18% 12%,rgba(255,231,239,.95),rgba(255,255,255,0) 28%),
+      radial-gradient(circle at 86% 18%,rgba(230,255,218,.85),rgba(255,255,255,0) 28%),
+      linear-gradient(180deg,#fffefa 0%,#fff5fa 100%) !important;
+    box-shadow:0 18px 46px rgba(218,91,131,.22), inset 0 3px 0 rgba(255,255,255,.92) !important;
+  }
+  .rewardBox:after{
+    content:'🍀';
+    position:absolute;
+    right:7%;
+    top:6%;
+    font-size:calc(var(--stage-w)*.034);
+    opacity:.78;
+    filter:drop-shadow(0 2px 0 #fff);
+  }
+  .rewardTitle{
+    font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",sans-serif !important;
+    font-size:calc(var(--stage-w)*.047) !important;
+    font-weight:1000 !important;
+    letter-spacing:.035em !important;
+    color:#ff5f97 !important;
+    -webkit-text-stroke:.35px rgba(255,255,255,.9);
+    text-shadow:0 2px 0 #fff,0 5px 12px rgba(255,130,168,.22) !important;
+  }
+  .rewardLevel{
+    font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",sans-serif !important;
+    font-size:calc(var(--stage-w)*.0185) !important;
+    font-weight:950 !important;
+    color:#45a547 !important;
+    text-shadow:0 1px 0 #fff !important;
+  }
+  .rewardAmount{
+    font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",sans-serif !important;
+    margin-top:3.4% !important;
+    font-size:calc(var(--stage-w)*.083) !important;
+    font-weight:1000 !important;
+    letter-spacing:-.03em !important;
+    color:#ff5d97 !important;
+    -webkit-text-stroke:1px rgba(255,255,255,.92);
+    text-shadow:0 3px 0 #fff,0 10px 20px rgba(255,124,164,.26) !important;
+  }
+  .rewardSub{
+    font-size:calc(var(--stage-w)*.0185) !important;
+    color:#9b8a70 !important;
+    font-weight:900 !important;
+  }
+  .rewardTools{
+    border-radius:22px !important;
+    background:linear-gradient(180deg,rgba(247,255,242,.96),rgba(255,250,253,.98)) !important;
+    box-shadow:inset 0 0 0 1.5px rgba(164,219,149,.55),0 8px 18px rgba(168,211,150,.13) !important;
+    font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",sans-serif !important;
+    font-size:calc(var(--stage-w)*.019) !important;
+    font-weight:900 !important;
+    color:#6d8c5f !important;
+  }
+  .rewardTools strong{color:#43a447 !important}
+  .rewardNote{
+    font-size:calc(var(--stage-w)*.0165) !important;
+    font-weight:850 !important;
+    color:#b58b95 !important;
+  }
+  .rewardBtn{
+    font-family:"Arial Rounded MT Bold","Microsoft YaHei","PingFang SC",sans-serif !important;
+    font-size:calc(var(--stage-w)*.023) !important;
+    font-weight:1000 !important;
+    box-shadow:0 10px 22px rgba(214,170,182,.22), inset 0 2px 0 rgba(255,255,255,.55) !important;
+  }
+
+  /* v44 顶部信息区重新整理 */
+  .ribbon{
+    left:21.2% !important;
+    top:25.85% !important;
+    width:57.6% !important;
+    filter:drop-shadow(0 5px 10px rgba(230,91,130,.15)) !important;
+  }
+  .tagline{
+    left:25.5% !important;
+    top:30.2% !important;
+    width:49.2% !important;
+    height:2.7% !important;
+    border-radius:999px !important;
+    background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,251,252,.90)) !important;
+    border:1.2px solid rgba(255,176,198,.50) !important;
+    box-shadow:0 5px 12px rgba(241,120,160,.06) !important;
+    color:#5aa253 !important;
+    font-size:calc(var(--stage-w)*.0192) !important;
+    font-weight:900 !important;
+    letter-spacing:.005em !important;
+    padding:0 .7em !important;
+  }
+  .tagline b{
+    font-size:1.06em !important;
+    color:#49a048 !important;
+  }
+  .statusRow{
+    left:22.2% !important;
+    top:33.05% !important;
+    width:55.6% !important;
+    height:3.8% !important;
+    gap:3.2% !important;
+    z-index:9 !important;
+  }
+  .status{
+    height:100% !important;
+    border-radius:999px !important;
+    background:linear-gradient(180deg,rgba(255,255,255,.99),rgba(255,248,250,.95)) !important;
+    border:1.5px solid rgba(255,142,175,.62) !important;
+    box-shadow:0 5px 12px rgba(231,78,126,.08) !important;
+    color:#56a74f !important;
+    font-size:calc(var(--stage-w)*.0245) !important;
+    font-weight:950 !important;
+    padding:0 .9em !important;
+  }
+  .status.tier{flex:1.02 !important}
+  .status.count{flex:.98 !important}
+  .status strong{
+    color:#ff679c !important;
+    font-weight:1000 !important;
+    margin-left:.18em !important;
+  }
+  .panel{
+    top:35.85% !important;
+  }
+
+  .confirmModal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(119,95,102,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;z-index:96;transition:opacity .22s ease;padding:8%}
+  .confirmModal.show{opacity:1;pointer-events:auto}
+  .confirmBox{width:82%;border-radius:28px;background:linear-gradient(180deg,#fffefa 0%,#fff6fb 100%);border:2.5px solid rgba(255,167,196,.9);box-shadow:0 18px 42px rgba(218,91,131,.22),inset 0 2px 0 rgba(255,255,255,.88);padding:6.2% 6%;text-align:center}
+  .confirmTitle{font-size:calc(var(--stage-w)*.038);font-weight:1000;color:#ff5f97;text-shadow:0 2px 0 #fff}
+  .confirmText{margin-top:4%;font-size:calc(var(--stage-w)*.021);line-height:1.55;color:#6da760;font-weight:850}
+  .confirmActions{display:flex;gap:4%;margin-top:6%}
+  .confirmBtn{flex:1;border:0;border-radius:999px;padding:4.1% 0;font-size:calc(var(--stage-w)*.0205);font-weight:1000;cursor:pointer;box-shadow:0 8px 18px rgba(214,170,182,.18)}
+  .confirmBtn.cancel{background:linear-gradient(180deg,#f7fff3,#e9f5df);color:#49a447;box-shadow:inset 0 0 0 2px rgba(171,214,146,.45),0 8px 18px rgba(171,214,146,.15)}
+  .confirmBtn.ok{background:linear-gradient(180deg,#ffd2df,#ff8fb1);color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.45),0 9px 20px rgba(238,158,184,.24)}
+  .confirmBtn:active{transform:scale(.97)}
+
+  /* v16 手机自适应铺满 + 弹窗放大 */
+  :root{--stage-w:min(100vw,760px) !important;}
+  html,body{height:100dvh !important;min-height:100dvh !important;}
+  body{align-items:stretch !important;justify-content:center !important;}
+  .stage{width:var(--stage-w) !important;height:100dvh !important;min-height:100dvh !important;max-height:none !important;}
+  @supports not (height:100dvh){.stage{height:100vh !important}.html,body{height:100vh !important}}
+  .redeemBox{width:84% !important;border-radius:30px !important;padding:8% 6.6% 7% !important}
+  .redeemTitle{font-size:calc(var(--stage-w)*.052) !important}
+  .redeemDesc{font-size:calc(var(--stage-w)*.0225) !important;line-height:1.55 !important}
+  .redeemInput{height:calc(var(--stage-w)*.092) !important;font-size:calc(var(--stage-w)*.030) !important}
+  .redeemButton{height:calc(var(--stage-w)*.095) !important;font-size:calc(var(--stage-w)*.034) !important}
+  .redeemMsg{font-size:calc(var(--stage-w)*.0235) !important;padding:.85em .9em !important}
+  .rewardBox{width:min(88%,calc(var(--stage-w)*.84)) !important;padding:8% 7% 7% !important}
+  .rewardTitle{font-size:calc(var(--stage-w)*.052) !important}
+  .rewardLevel{font-size:calc(var(--stage-w)*.022) !important}
+  .rewardAmount{font-size:calc(var(--stage-w)*.090) !important}
+  .rewardSub{font-size:calc(var(--stage-w)*.022) !important}
+  .rewardTools{font-size:calc(var(--stage-w)*.0225) !important;line-height:1.6 !important}
+  .rewardNote{font-size:calc(var(--stage-w)*.0205) !important;line-height:1.55 !important}
+  .rewardBtn{font-size:calc(var(--stage-w)*.0265) !important;padding:4.8% 0 !important}
+  .confirmBox{width:88% !important;padding:7% 6.5% !important}
+  .confirmTitle{font-size:calc(var(--stage-w)*.045) !important}
+  .confirmText{font-size:calc(var(--stage-w)*.024) !important;line-height:1.65 !important}
+  .confirmBtn{font-size:calc(var(--stage-w)*.023) !important;padding:4.8% 0 !important}
+  .modalBox{width:88% !important;padding:8% 6.5% !important}
+  .modalBox h3{font-size:calc(var(--stage-w)*.048) !important}
+  .modalBox p{font-size:calc(var(--stage-w)*.028) !important;line-height:1.75 !important}
+  .modalBox button{font-size:calc(var(--stage-w)*.032) !important}
+
+</style>
+</head>
+<body>
+<div class="stage locked" id="stage">
+  <img class="bg" id="bg" alt="背景">
+  <img class="logo" id="logo" alt="Koi Club">
+  <img class="topbtn act" id="btnActivity" alt="活动">
+  <img class="topbtn rule" id="btnRules" alt="规则">
+  <img class="title" id="title" alt="LUCKY KOI">
+  <img class="mainKoi" id="mainKoi" alt="锦鲤">
+  <img class="badge" id="badge" alt="幸运刮刮乐">
+  <img class="ribbon" id="ribbon" alt="好运锦鲤 刮出惊喜">
+  <div class="tagline"><span class="miniClover"></span>共有 <b>25</b> 个格子 / 惊喜等你刮开！</div>
+  <div class="statusRow">
+    <div class="status tier"><span class="c"></span>档位 <strong id="tierText">18.8r</strong></div>
+    <div class="status count"><span class="c"></span>已刮 <strong id="countText">0/15</strong></div>
+  </div>
+  <div class="panel">
+    <img class="panelImg" id="panelImg" alt="25格面板">
+    <div class="grid" id="grid"></div>
+    <img class="luckyTag" id="luckyTag" alt="好运加成">
+  </div>
+  <div class="summary">
+    <div class="left"><span class="label">当前累计</span><span class="num" id="totalText">0W</span></div>
+    <div class="right"><span class="toolTip">大金奖励<br>单独兑换</span><button class="againBtn" id="againBtn">再兑一张</button></div>
+  </div>
+  <div class="options">
+    <button class="opt" data-level="8"><img id="btn8" alt="8.8r 刮8格"></button>
+    <button class="opt active" data-level="15"><img id="btn18" alt="18.8r 刮15格"></button>
+    <button class="opt" data-level="25"><img id="btn28" alt="28.8r 刮25格"></button>
+  </div>
+  <button class="mainBtn" id="mainBtn"><img id="mainBtnImg" alt="立即开刮"></button>
+  <div class="hint" id="hint">点击格子刮开，刮满后复制开奖结果</div>
+
+  <div class="prizePage" id="prizePage" aria-hidden="true">
+    <img src="assets/asset_87354b42b4c18ddb.png" alt="奖池页面">
+  </div>
+  <div class="nav">
+    <img class="navBg" id="navBg" alt="导航背景">
+    <div class="navActive"></div>
+    <img class="navIcon navHome" id="navHome" alt="首页">
+    <img class="navIcon navScratch" id="navScratch" alt="奖池">
+    <img class="navIcon navRecord" id="navRecord" alt="记录">
+    <img class="navIcon navMine" id="navMine" alt="我的">
+    <button class="navHit home" data-tab="home" aria-label="首页"></button>
+    <button class="navHit scratch" data-tab="scratch" aria-label="奖池"></button>
+    <button class="navHit record" data-tab="record" aria-label="记录"></button>
+    <button class="navHit mine" data-tab="mine" aria-label="我的"></button>
+  </div>
+
+  <div class="redeemLayer" id="redeemLayer">
+    <div class="redeemBox">
+      <div class="redeemTitle">兑换码解锁</div>
+      <div class="redeemDesc">输入对应档位专属兑换码，校验通过后才可以刮奖。</div>
+      <input class="redeemInput" id="redeemInput" placeholder="请输入兑换码" autocomplete="off">
+      <button class="redeemButton" id="redeemButton">立即解锁</button>
+      <div class="redeemMsg" id="redeemMsg"></div>
+      
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="modal"><div class="modalBox"><h3 id="modalTitle">玩法规则</h3><div id="modalText"></div><button id="modalClose">知道啦</button></div></div>
+  <div class="rewardModal" id="rewardModal">
+    <div class="rewardBox">
+      <div class="rewardTitle">刮刮乐奖励通知</div>
+      <div class="rewardLevel" id="rewardLevelText">18.8r · 已完成 15 格</div>
+      <div class="rewardAmount" id="rewardAmountText">0W</div>
+      <div class="rewardSub">本局累计金额奖励</div>
+      <div class="rewardTools" id="rewardToolsText"><strong>大金奖励：</strong>暂无，继续好运加倍～</div>
+      <div class="rewardNote" id="rewardNoteText">金额奖励已自动统计，大金奖励可单独兑换。</div>
+      <div class="rewardActions">
+        <button class="rewardBtn secondary" id="rewardCloseBtn">再兑一张</button>
+        <button class="rewardBtn primary" id="rewardCopyBtn">复制结果</button>
+      </div>
+    </div>
+  </div>
+  <div class="confirmModal" id="newRedeemConfirm">
+    <div class="confirmBox">
+      <div class="confirmTitle">确认换新码一张吗？</div>
+      <div class="confirmText">当前奖励还在页面上，点「取消」可以继续查看；确认后才会回到兑换码输入。</div>
+      <div class="confirmActions">
+        <button class="confirmBtn cancel" id="cancelNewRedeem">取消，继续查看</button>
+        <button class="confirmBtn ok" id="confirmNewRedeem">确认换新码</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const IMG={'bg':'assets/asset_1bf2f2812b1170cc.png','logo':'assets/asset_cc97aa24eafc03f9.png','title':'assets/asset_2860ca6c4caa86f9.png','ribbon':'assets/asset_c54f98c1fa412b5a.png','badge':'assets/asset_725fb21b111e9822.png','panel':'assets/asset_4b1a877a3b0a4dda.png','tile_bg':'assets/asset_f86cd191568b5024.png','cover':'assets/asset_47509b62a5f33dda.png','thanks':'assets/asset_3d1c906a839abb77.png','btn_8':'assets/asset_c280013dc8d248b2.png','btn_18':'assets/asset_40c9872773cd449e.png','btn_28':'assets/asset_52112d134c68a0e5.png','btn_start':'assets/asset_28fcf3ff094dcd4f.png','btn_copy':'assets/asset_2eeb709515880bb0.png','btn_activity':'assets/asset_9a98d442f4e29340.png','btn_rules':'assets/asset_dbc04eba39cb4626.png','nav_bg':'assets/asset_174d7af9355f6c93.png','nav_home':'assets/asset_9f2a34eaf0175331.png','nav_scratch':'assets/asset_c33ed9736bd11a00.png','nav_record':'assets/asset_2f91f69f17670a51.png','nav_mine':'assets/asset_3f649ee6aa5285eb.png','clover':'assets/asset_a7ae070820314266.png','koi':'assets/asset_a4239b74321eaf5d.png','koi_coin':'assets/asset_ac47a997243161ac.png','coin66':'assets/asset_528d84dda2eb1e2e.png','gift':'assets/asset_6f6c9828261e80db.png','heart':'assets/asset_0a3a109b8e7bf7b7.png','sword':'assets/asset_8bf5707aa3903c96.png','cup':'assets/asset_34c86eb59fec8b5d.png','lucky_tag':'assets/asset_da680c655b0d7191.png'};
+const $=id=>document.getElementById(id);
+function setImg(id,key){$(id).src=IMG[key];}
+['bg','logo','title','badge','ribbon','panelImg','mainKoi','luckyTag','btnActivity','btnRules','btn8','btn18','btn28','mainBtnImg','navBg','navHome','navScratch','navRecord','navMine'].forEach(id=>{
+  const map={panelImg:'panel',mainKoi:'koi',btnActivity:'btn_activity',btnRules:'btn_rules',btn8:'btn_8',btn18:'btn_18',btn28:'btn_28',mainBtnImg:'btn_start',navBg:'nav_bg',navHome:'nav_home',navScratch:'nav_scratch',navRecord:'nav_record',navMine:'nav_mine'};
+  setImg(id,map[id]||id);
+});
+document.querySelectorAll('.c,.miniClover').forEach(el=>el.style.backgroundImage=`url(${IMG.clover})`);
+document.documentElement.style.setProperty('--tileBg',`url(${IMG.tile_bg})`);
+const LEVELS={8:{price:'8.8r',limit:8,max:300},15:{price:'18.8r',limit:15,max:500},25:{price:'28.8r',limit:25,max:800}};
+let current=15,scratched=0,total=0,tools=[],board=[],recorded=false;
+let unlocked=false,activeCode='',lockedLevel=null,drawQueue=[],redeemId='';
+let scratchStates=[];
+const API_BASE = window.location.origin;
+const BLANK_ASSET="assets/asset_5c195c1bdbd499bf.png";
+const moneyPool=[5,10,15,30,50,80,100,150,200];
+const REWARD_ASSETS={"5":"assets/asset_a1c2b18b7d741088.png","10":"assets/asset_0d799dc7b9a956a3.png","15":"assets/asset_a5627583775633d7.png","30":"assets/asset_c3f183b1934acdef.png","50":"assets/asset_950fef689f910851.png","80":"assets/asset_6f220b2c9d884853.png","100":"assets/asset_b1c2ef787b10c81b.png","150":"assets/asset_1695c99fffd1e962.png","200":"assets/asset_d7b11fb54d6b2e08.png","wadang":"assets/asset_1a2e78dddd7c4adc.png","tunjin":"assets/asset_1d3bd180f03b54cc.png","sword":"assets/asset_2e11ba0d14c183d1.png","cup":"assets/asset_9466193f6736d2de.png"};
+const itemPool=['wadang','tunjin','sword','cup'];
+const coverTexture=new Image(); coverTexture.src=IMG.cover;
+
+Object.values(REWARD_ASSETS).forEach(src=>{const im=new Image(); im.src=src;});
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function rewardAsset(p){
+  if(!p || p.type==='blank') return '';
+  if(p.type==='money') return REWARD_ASSETS[String(p.value)] || REWARD_ASSETS['30'];
+  const key={wadang:'wadang',tunjin:'tunjin',sword:'sword',cup:'cup'}[p.type];
+  return REWARD_ASSETS[key] || REWARD_ASSETS['30'];
+}
+function tileHTML(p){
+  if(!p || p.type==='blank') return `<div class="prize prizeCard blankPrize"><img class="rewardCard blankCard" src="${BLANK_ASSET}" alt="谢谢惠顾"></div>`;
+  return `<div class="prize prizeCard"><img class="rewardCard" src="${rewardAsset(p)}" alt=""></div>`;
+}
+function drawCover(state){
+  const {canvas,ctx}=state;
+  const rect=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  const w=Math.max(1,Math.round(rect.width*dpr));
+  const h=Math.max(1,Math.round(rect.height*dpr));
+  canvas.width=w; canvas.height=h;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,w,h);
+  if(coverTexture.complete&&coverTexture.naturalWidth){ctx.drawImage(coverTexture,0,0,w,h);}else{
+    const g=ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#edeef1'); g.addColorStop(.5,'#dfe1e5'); g.addColorStop(1,'#cfd3d7');
+    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='rgba(255,255,255,.28)'; for(let y=0;y<h;y+=16){ctx.fillRect(0,y,w,1);} }
+}
+function scratchAt(state,clientX,clientY,drag){
+  const rect=state.canvas.getBoundingClientRect();
+  const scaleX=state.canvas.width/rect.width, scaleY=state.canvas.height/rect.height;
+  const x=(clientX-rect.left)*scaleX, y=(clientY-rect.top)*scaleY;
+  const r=Math.max(16*scaleX,state.canvas.width*.11);
+  const ctx=state.ctx;
+  ctx.save();
+  ctx.globalCompositeOperation='destination-out';
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  if(drag){ctx.lineWidth=r*2; ctx.beginPath(); ctx.moveTo(state.lastX,state.lastY); ctx.lineTo(x,y); ctx.stroke();}
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  state.lastX=x; state.lastY=y;
+}
+function revealRatio(state){
+  const data=state.ctx.getImageData(0,0,state.canvas.width,state.canvas.height).data;
+  let clear=0, totalPx=0;
+  for(let i=3;i<data.length;i+=24){totalPx++; if(data[i]<70)clear++;}
+  return totalPx?clear/totalPx:0;
+}
+function tryReveal(index){
+  const state=scratchStates[index];
+  if(!state||state.done||scratched>=LEVELS[current].limit)return;
+  if(revealRatio(state)>=.34)reveal(index);
+}
+function attachScratch(tile,canvas,index){
+  const state={canvas,ctx:canvas.getContext('2d',{willReadFrequently:true}),down:false,done:false,lastX:0,lastY:0};
+  scratchStates[index]=state;
+  requestAnimationFrame(()=>drawCover(state));
+  const endScratch=e=>{if(!state.down)return; state.down=false; tryReveal(index); try{if(canvas.hasPointerCapture&&canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}};
+  canvas.addEventListener('pointerdown',e=>{ if(scratched>=LEVELS[current].limit){showToast('本局已刮满，奖励弹窗已出现'); return;} if(state.done)return; state.down=true; canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId); scratchAt(state,e.clientX,e.clientY,false); e.preventDefault(); });
+  canvas.addEventListener('pointermove',e=>{ if(!state.down||state.done)return; scratchAt(state,e.clientX,e.clientY,true); if(Math.random()<.18)tryReveal(index); e.preventDefault(); });
+  canvas.addEventListener('pointerup',endScratch); canvas.addEventListener('pointercancel',endScratch); canvas.addEventListener('pointerleave',endScratch);
+}
+function renderTile(p,i){
+  const el=document.createElement('div');
+  el.className='tile';
+  el.innerHTML=tileHTML(null)+`<canvas class="scratchCanvas"></canvas>`;
+  attachScratch(el,el.querySelector('.scratchCanvas'),i);
+  return el;
+}
+function closeRewardModal(){ $('rewardModal').classList.remove('show'); }
+function requestNewRedeem(){
+  if(unlocked && scratched>=LEVELS[current].limit && remainingTickets>0){
+    continueNextCard();
+    return;
+  }
+  if(unlocked && scratched>=LEVELS[current].limit){
+    $('newRedeemConfirm').classList.add('show');
+  }else{
+    startNewRedeem();
+  }
+}
+function closeNewRedeemConfirm(){ $('newRedeemConfirm').classList.remove('show'); }
+function startNewRedeem(){
+  closeNewRedeemConfirm();
+  closeRewardModal();
+  unlocked=false;
+  activeCode='';
+  lockedLevel=null;
+  drawQueue=[];
+  redeemId='';
+  remainingTickets=0;
+  totalTickets=1;
+  usedTickets=0;
+  current=15;
+  scratched=0;
+  total=0;
+  tools=[];
+  recorded=false;
+  board=Array.from({length:25},()=>null);
+  scratchStates=[];
+  $('grid').innerHTML='';
+  board.forEach((p,i)=>$('grid').appendChild(renderTile(p,i)));
+  $('mainBtnImg').src=IMG.btn_start;
+  $('redeemInput').value='';
+  clearRedeemMsg();
+  $('redeemLayer').style.display='flex';
+  $('stage').classList.add('locked');
+  $('stage').classList.remove('unlocked','finished');
+  $('hint').textContent='请输入新的兑换码解锁后开始刮奖';
+  update();
+  setTimeout(()=>$('redeemInput').focus(),120);
+}
+function openRewardModal(){
+  const level=LEVELS[current];
+  const cardInfo=totalTickets>1 ? ` · 第 ${usedTickets}/${totalTickets} 张` : '';
+  $('rewardLevelText').textContent=`${level.price} · 已完成 ${level.limit} 格${cardInfo}`;
+  $('rewardAmountText').textContent=`${total}W`;
+  $('rewardToolsText').innerHTML=tools.length?`<strong>大金奖励：</strong>${tools.join('、')}`:'<strong>大金奖励：</strong>暂无，继续好运加倍～';
+  $('rewardNoteText').textContent=remainingTickets>0 ? `当前兑换码还可继续刮 ${remainingTickets} 张，点左侧按钮直接开启下一张。` : (tools.length?'金额奖励已自动统计，大金奖励可单独兑换。':'本局金额奖励已自动统计，可以继续复制结果发给客服。');
+  $('rewardCloseBtn').textContent=remainingTickets>0 ? `继续下一张(${remainingTickets})` : '再兑一张';
+  $('rewardModal').classList.add('show');
+}
+function reset(){
+  $('stage').classList.remove('finished');
+  scratched=0; total=0; tools=[]; recorded=false; board=Array.from({length:25},()=>null); scratchStates=[]; closeRewardModal();
+  $('grid').innerHTML='';
+  board.forEach((p,i)=>$('grid').appendChild(renderTile(p,i)));
+  $('mainBtnImg').src=IMG.btn_start;
+  $('hint').textContent=unlocked?'直接用手指刮开银色覆膜，或点击立即开刮一键刮开全部':'请输入兑换码解锁后开始刮奖';
+  update();
+}
+function update(){
+  const level=LEVELS[current];
+  $('tierText').textContent=level.price;
+  $('countText').textContent=`${scratched}/${level.limit}`;
+  $('totalText').textContent=`${total}W`;
+  document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('active',+o.dataset.level===current));
+  $('mainBtnImg').src=scratched>=level.limit?IMG.btn_copy:IMG.btn_start;
+  if($('againBtn')) $('againBtn').textContent=remainingTickets>0 ? `继续刮(${remainingTickets})` : '再兑一张';
+  $('stage').classList.toggle('finished', unlocked && scratched>=level.limit);
+}
+function reveal(i){
+  if(!unlocked){showToast('请先输入兑换码解锁'); return;}
+  const level=LEVELS[current];
+  if(scratched>=level.limit){showToast('本局已完成，可以复制结果'); return;}
+  const tile=$('grid').children[i];
+  if(!tile||tile.classList.contains('revealed'))return;
+  const p=drawQueue[scratched] || {type:'blank'};
+  board[i]=p;
+  const prizeNode=tile.querySelector('.prize');
+  if(prizeNode) prizeNode.outerHTML=tileHTML(p);
+  tile.classList.add('revealed','pop'); setTimeout(()=>tile.classList.remove('pop'),220);
+  const state=scratchStates[i]; if(state){state.done=true; state.canvas.style.opacity='0'; state.canvas.style.pointerEvents='none';}
+  scratched++;
+  if(p.type==='money')total+=Number(p.value||0);
+  if(p.type==='wadang')tools.push('瓦当');
+  if(p.type==='tunjin')tools.push('吞金兽');
+  if(p.type==='sword')tools.push('大剑');
+  if(p.type==='cup')tools.push('圣杯');
+  if(total>level.max)total=level.max;
+  update();
+  if(scratched>=level.limit){
+    $('hint').textContent='本局已完成，奖励弹窗已打开，也可以点击按钮复制结果';
+    if(!recorded){saveRecord(); recorded=true;}
+    showToast('刮完啦，快看看奖励通知');
+    setTimeout(openRewardModal,260);
+  }
+}
+function copyResult(){
+  const level=LEVELS[current];
+  const toolText=tools.length?`，道具：${tools.join('、')}`:'';
+  const codeText=activeCode?`｜兑换码 ${activeCode}`:'';
+  const cardText=totalTickets>1?`｜第${usedTickets}/${totalTickets}张`:'';
+  const txt=`Koi Club LUCKY KOI｜${level.price} 刮${level.limit}格${cardText}｜累计 ${total}W${toolText}${codeText}`;
+  navigator.clipboard?.writeText(txt).then(()=>showToast('已复制开奖结果')).catch(()=>showToast(txt));
+}
+function showToast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>el.classList.remove('show'),1800)}
+
+function showRedeemMsg(t,type='err'){const el=$('redeemMsg');if(!el)return;el.textContent=t;el.classList.add('show');el.classList.toggle('ok',type==='ok');}
+function clearRedeemMsg(){const el=$('redeemMsg');if(!el)return;el.textContent='';el.classList.remove('show','ok');}
+
+function applyRedeemData(data,code){
+  unlocked=true;
+  activeCode=data.code||code||activeCode;
+  redeemId=data.redeemId||'';
+  lockedLevel=Number(data.level);
+  current=Number(data.level);
+  drawQueue=Array.isArray(data.sequence)?data.sequence:[];
+  remainingTickets=Number(data.remainingTickets||0);
+  totalTickets=Number(data.totalTickets || (Number(data.usedTickets||0)+remainingTickets) || 1);
+  usedTickets=Number(data.usedTickets || Math.max(1,totalTickets-remainingTickets));
+  if(drawQueue.length<LEVELS[current].limit){
+    throw new Error('后端未返回完整开奖结果');
+  }
+}
+async function fetchRedeemByCode(code){
+  const res=await fetch(`${API_BASE}/api/redeem`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({code})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error||'兑换码校验失败');
+  return data;
+}
+async function continueNextCard(){
+  if(!activeCode){requestNewRedeem();return;}
+  try{
+    closeNewRedeemConfirm();
+    closeRewardModal();
+    showToast('正在开启下一张...');
+    const data=await fetchRedeemByCode(activeCode);
+    applyRedeemData(data,activeCode);
+    $('redeemLayer').style.display='none';
+    $('stage').classList.remove('locked');
+    $('stage').classList.add('unlocked');
+    reset();
+    showToast(`已开启下一张：还剩 ${remainingTickets} 张`);
+  }catch(e){
+    showToast(friendlyRedeemError(e));
+  }
+}
+function friendlyRedeemError(e){
+  const raw=(e && e.message) ? e.message : '';
+  if(/Load failed|Failed to fetch|NetworkError|Network request failed/i.test(raw)){
+    return '连接后端失败，请确认电脑黑色窗口没有关闭，并且手机和电脑在同一个网络';
+  }
+  return raw || '兑换码不正确，请重新输入';
+}
+async function unlockByCode(){
+  const code=$('redeemInput').value.trim().toUpperCase();
+  clearRedeemMsg();
+  if(!code){showRedeemMsg('请输入兑换码后再解锁'); $('redeemInput').focus(); return;}
+  try{
+    $('redeemButton').disabled=true;
+    $('redeemButton').textContent='校验中...';
+    showRedeemMsg('正在校验兑换码，请稍等...','ok');
+    const data=await fetchRedeemByCode(code);
+    applyRedeemData(data,code);
+    clearRedeemMsg();
+    $('redeemLayer').style.display='none';
+    $('stage').classList.remove('locked');
+    $('stage').classList.add('unlocked');
+    reset();
+    showToast(totalTickets>1 ? `解锁成功：共 ${totalTickets} 张，还剩 ${remainingTickets} 张` : `解锁成功：${LEVELS[current].price}`);
+  }catch(e){
+    showRedeemMsg(friendlyRedeemError(e));
+    $('redeemInput').focus();
+  }finally{
+    $('redeemButton').disabled=false;
+    $('redeemButton').textContent='立即解锁';
+  }
+}
+function revealAll(){
+  if(!unlocked){showToast('请先输入兑换码解锁'); return;}
+  const level=LEVELS[current];
+  if(scratched>=level.limit){copyResult(); return;}
+  const order=[...Array(board.length).keys()].filter(i=>!$('grid').children[i].classList.contains('revealed'));
+  let delay=0;
+  for(const i of order){
+    if(scratched>=level.limit)break;
+    setTimeout(()=>{ if(scratched<level.limit) reveal(i); }, delay);
+    delay += 55;
+  }
+}
+document.querySelectorAll('.opt').forEach(btn=>btn.addEventListener('click',()=>{
+  const next=+btn.dataset.level;
+  if(!unlocked){showToast('请先输入兑换码解锁'); return;}
+  if(lockedLevel!==next){showToast('兑换码已绑定当前档位，不能切换'); return;}
+  current=next; reset();
+}));
+$('redeemButton').addEventListener('click',unlockByCode);
+$('redeemInput').addEventListener('input',clearRedeemMsg);
+$('redeemInput').addEventListener('keydown',e=>{if(e.key==='Enter')unlockByCode();});
+$('mainBtn').addEventListener('click',()=>{if(scratched>=LEVELS[current].limit)copyResult();else revealAll();});
+$('againBtn').addEventListener('click',requestNewRedeem);
+
+$('rewardCloseBtn').addEventListener('click',requestNewRedeem);
+$('rewardCopyBtn').addEventListener('click',()=>{copyResult(); closeRewardModal();});
+$('cancelNewRedeem').addEventListener('click',closeNewRedeemConfirm);
+$('confirmNewRedeem').addEventListener('click',()=>{closeNewRedeemConfirm(); startNewRedeem();});
+$('newRedeemConfirm').addEventListener('click',e=>{if(e.target===$('newRedeemConfirm'))closeNewRedeemConfirm();});
+$('rewardModal').addEventListener('click',e=>{if(e.target===$('rewardModal'))closeRewardModal();});
+window.addEventListener('resize',()=>scratchStates.forEach(s=>{if(s&&!s.done)drawCover(s)}));
+coverTexture.addEventListener('load',()=>scratchStates.forEach(s=>{if(s&&!s.done)drawCover(s)}));
+function openModal(type){$('modalTitle').textContent=type==='act'?'活动说明':'玩法规则';$('modalText').innerHTML=type==='act'?'<p>输入兑换码解锁对应档位，解锁后可手动刮开，也可一键刮开全部。</p><p>金额奖励自动累计，道具奖励单独兑换。</p>':'<p>8.8r 刮8格，18.8r 刮15格，28.8r 刮25格。</p><p>兑换码绑定档位，只能解锁对应档位玩法。</p>';$('modal').classList.add('show');}
+$('btnActivity').addEventListener('click',()=>openModal('act'));$('btnRules').addEventListener('click',()=>openModal('rule'));$('modalClose').addEventListener('click',()=>$('modal').classList.remove('show'));$('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show')});
+
+let records=[];
+function saveRecord(){
+  const level=LEVELS[current];
+  const now=new Date();
+  records.unshift({time:`${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`, price:level.price, total, tools:[...tools]});
+  records=records.slice(0,8);
+}
+function navTo(tab){
+  const idMap={home:'navHome',scratch:'navScratch',record:'navRecord',mine:'navMine'};
+  document.querySelectorAll('.navIcon').forEach(el=>el.classList.remove('is-active','tap'));
+  const activeIcon=$(idMap[tab]||'navHome');
+  if(activeIcon){
+    activeIcon.classList.add('is-active');
+    void activeIcon.offsetWidth;
+    activeIcon.classList.add('tap');
+    setTimeout(()=>activeIcon.classList.remove('tap'),220);
+  }
+
+  const isPrize = tab==='scratch';
+  $('prizePage').classList.toggle('show', isPrize);
+  $('stage').classList.toggle('prize-mode', isPrize);
+
+  if(tab==='home'){showToast('首页');}
+  if(tab==='scratch'){return;}
+  if(tab==='record'){
+    $('modalTitle').textContent='近期记录';
+    const rows=records.length?records.map(r=>`<p>${r.time}｜${r.price}｜累计 ${r.total}W${r.tools.length?'｜'+r.tools.join('、'):''}</p>`).join(''):'<p>暂无记录，完成一局后会显示在这里。</p>';
+    $('modalText').innerHTML=rows;
+    $('modal').classList.add('show');
+  }
+  if(tab==='mine'){
+    $('modalTitle').textContent='欢迎宝宝游玩';
+    $('modalText').innerHTML='<p>Koi Club 刮刮乐</p><p>Koi 后续会持续更新更多有趣玩法哦</p><p>敬请期待</p>';
+    $('modal').classList.add('show');
+  }
+}
+document.querySelectorAll('.navHit').forEach(b=>b.addEventListener('click',()=>navTo(b.dataset.tab)));
+navTo('home');
+
+reset();
+</script>
+</body>
+</html>
