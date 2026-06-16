@@ -360,6 +360,8 @@
   .modalBox p{font-size:calc(var(--stage-w)*.028) !important;line-height:1.75 !important}
   .modalBox button{font-size:calc(var(--stage-w)*.032) !important}
 
+
+  .rewardAmount.bigPrizeText{font-size:calc(var(--stage-w)*.046)!important;line-height:1.25;color:#f45f92;text-shadow:0 2px 0 #fff;white-space:normal;padding:.15em 0}
 </style>
 </head>
 <body>
@@ -395,7 +397,7 @@
   <div class="hint" id="hint">点击格子刮开，刮满后复制开奖结果</div>
 
   <div class="prizePage" id="prizePage" aria-hidden="true">
-    <img src="assets/asset_87354b42b4c18ddb.png" alt="奖池页面">
+    <img src="assets/prize_pool_new.png" alt="幸运奖池">
   </div>
   <div class="nav">
     <img class="navBg" id="navBg" alt="导航背景">
@@ -427,7 +429,7 @@
       <div class="rewardTitle">刮刮乐奖励通知</div>
       <div class="rewardLevel" id="rewardLevelText">18.8r · 已完成 15 格</div>
       <div class="rewardAmount" id="rewardAmountText">0W</div>
-      <div class="rewardSub">本局累计金额奖励</div>
+      <div class="rewardSub" id="rewardSub">本局累计金额奖励</div>
       <div class="rewardTools" id="rewardToolsText"><strong>大金奖励：</strong>暂无，继续好运加倍～</div>
       <div class="rewardNote" id="rewardNoteText">金额奖励已自动统计，大金奖励可单独兑换。</div>
       <div class="rewardActions">
@@ -460,12 +462,13 @@ document.documentElement.style.setProperty('--tileBg',`url(${IMG.tile_bg})`);
 const LEVELS={8:{price:'8.8r',limit:8,max:300},15:{price:'18.8r',limit:15,max:500},25:{price:'28.8r',limit:25,max:800}};
 let current=15,scratched=0,total=0,tools=[],board=[],recorded=false;
 let unlocked=false,activeCode='',lockedLevel=null,drawQueue=[],redeemId='';
+let remainingTickets=0,totalTickets=1,usedTickets=0,currentRewardMode='money',currentItemName='';
 let scratchStates=[];
 const API_BASE = window.location.origin;
 const BLANK_ASSET="assets/asset_5c195c1bdbd499bf.png";
 const moneyPool=[5,10,15,30,50,80,100,150,200];
-const REWARD_ASSETS={"5":"assets/asset_a1c2b18b7d741088.png","10":"assets/asset_0d799dc7b9a956a3.png","15":"assets/asset_a5627583775633d7.png","30":"assets/asset_c3f183b1934acdef.png","50":"assets/asset_950fef689f910851.png","80":"assets/asset_6f220b2c9d884853.png","100":"assets/asset_b1c2ef787b10c81b.png","150":"assets/asset_1695c99fffd1e962.png","200":"assets/asset_d7b11fb54d6b2e08.png","wadang":"assets/asset_1a2e78dddd7c4adc.png","tunjin":"assets/asset_1d3bd180f03b54cc.png","sword":"assets/asset_2e11ba0d14c183d1.png","cup":"assets/asset_9466193f6736d2de.png"};
-const itemPool=['wadang','tunjin','sword','cup'];
+const REWARD_ASSETS={"5":"assets/asset_a1c2b18b7d741088.png","10":"assets/asset_0d799dc7b9a956a3.png","15":"assets/asset_a5627583775633d7.png","30":"assets/asset_c3f183b1934acdef.png","50":"assets/asset_950fef689f910851.png","80":"assets/asset_6f220b2c9d884853.png","100":"assets/asset_b1c2ef787b10c81b.png","150":"assets/asset_1695c99fffd1e962.png","200":"assets/asset_d7b11fb54d6b2e08.png","longzhou":"assets/reward_longzhou.png","sword":"assets/reward_sword_new.png","cup":"assets/asset_9466193f6736d2de.png"};
+const itemPool=['longzhou','sword'];
 const coverTexture=new Image(); coverTexture.src=IMG.cover;
 
 Object.values(REWARD_ASSETS).forEach(src=>{const im=new Image(); im.src=src;});
@@ -474,7 +477,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 function rewardAsset(p){
   if(!p || p.type==='blank') return '';
   if(p.type==='money') return REWARD_ASSETS[String(p.value)] || REWARD_ASSETS['30'];
-  const key={wadang:'wadang',tunjin:'tunjin',sword:'sword',cup:'cup'}[p.type];
+  const key={longzhou:'longzhou',sword:'sword',cup:'cup',wadang:'longzhou',tunjin:'sword'}[p.type];
   return REWARD_ASSETS[key] || REWARD_ASSETS['30'];
 }
 function tileHTML(p){
@@ -560,6 +563,8 @@ function startNewRedeem(){
   remainingTickets=0;
   totalTickets=1;
   usedTickets=0;
+  currentRewardMode='money';
+  currentItemName='';
   current=15;
   scratched=0;
   total=0;
@@ -582,10 +587,13 @@ function startNewRedeem(){
 function openRewardModal(){
   const level=LEVELS[current];
   const cardInfo=totalTickets>1 ? ` · 第 ${usedTickets}/${totalTickets} 张` : '';
+  const isBigPrize = tools.length || currentRewardMode==='item';
   $('rewardLevelText').textContent=`${level.price} · 已完成 ${level.limit} 格${cardInfo}`;
-  $('rewardAmountText').textContent=`${total}W`;
-  $('rewardToolsText').innerHTML=tools.length?`<strong>大金奖励：</strong>${tools.join('、')}`:'<strong>大金奖励：</strong>暂无，继续好运加倍～';
-  $('rewardNoteText').textContent=remainingTickets>0 ? `当前兑换码还可继续刮 ${remainingTickets} 张，点左侧按钮直接开启下一张。` : (tools.length?'金额奖励已自动统计，大金奖励可单独兑换。':'本局金额奖励已自动统计，可以继续复制结果发给客服。');
+  $('rewardAmountText').textContent=isBigPrize ? '本局触发大金奖励' : `${total}W`;
+  $('rewardAmountText').classList.toggle('bigPrizeText', !!isBigPrize);
+  $('rewardSub').textContent=isBigPrize ? '大金奖励单独兑换' : '本局累计金额奖励';
+  $('rewardToolsText').innerHTML=isBigPrize ? `<strong>大金奖励：</strong>${tools.length?tools.join('、'):(currentItemName||'大剑')}` : '<strong>大金奖励：</strong>暂无，继续好运加倍～';
+  $('rewardNoteText').textContent=remainingTickets>0 ? `当前兑换码还可继续刮 ${remainingTickets} 张，点左侧按钮直接开启下一张。` : (isBigPrize?'本局大金奖励已触发，请复制结果发给客服。':'本局金额奖励已自动统计，可以继续复制结果发给客服。');
   $('rewardCloseBtn').textContent=remainingTickets>0 ? `继续下一张(${remainingTickets})` : '再兑一张';
   $('rewardModal').classList.add('show');
 }
@@ -622,8 +630,7 @@ function reveal(i){
   const state=scratchStates[i]; if(state){state.done=true; state.canvas.style.opacity='0'; state.canvas.style.pointerEvents='none';}
   scratched++;
   if(p.type==='money')total+=Number(p.value||0);
-  if(p.type==='wadang')tools.push('瓦当');
-  if(p.type==='tunjin')tools.push('吞金兽');
+  if(p.type==='longzhou')tools.push('龙舟送吉');
   if(p.type==='sword')tools.push('大剑');
   if(p.type==='cup')tools.push('圣杯');
   if(total>level.max)total=level.max;
@@ -640,7 +647,8 @@ function copyResult(){
   const toolText=tools.length?`，道具：${tools.join('、')}`:'';
   const codeText=activeCode?`｜兑换码 ${activeCode}`:'';
   const cardText=totalTickets>1?`｜第${usedTickets}/${totalTickets}张`:'';
-  const txt=`Koi Club LUCKY KOI｜${level.price} 刮${level.limit}格${cardText}｜累计 ${total}W${toolText}${codeText}`;
+  const resultMain=(tools.length||currentRewardMode==='item')?`本局触发大金奖励${toolText}`:`累计 ${total}W${toolText}`;
+  const txt=`Koi Club LUCKY KOI｜${level.price} 刮${level.limit}格${cardText}｜${resultMain}${codeText}`;
   navigator.clipboard?.writeText(txt).then(()=>showToast('已复制开奖结果')).catch(()=>showToast(txt));
 }
 function showToast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>el.classList.remove('show'),1800)}
@@ -658,6 +666,8 @@ function applyRedeemData(data,code){
   remainingTickets=Number(data.remainingTickets||0);
   totalTickets=Number(data.totalTickets || (Number(data.usedTickets||0)+remainingTickets) || 1);
   usedTickets=Number(data.usedTickets || Math.max(1,totalTickets-remainingTickets));
+  currentRewardMode=data.mode||'money';
+  currentItemName=data.itemName||'';
   if(drawQueue.length<LEVELS[current].limit){
     throw new Error('后端未返回完整开奖结果');
   }

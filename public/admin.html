@@ -101,21 +101,24 @@ a{color:var(--pink);font-weight:1000;text-decoration:none}
       <div class="settingBox">
         <h3>8.8r 档</h3>
         <p>空白 1-2；金额 150W-300W；不出大金。</p>
-        <label>大金概率 <input id="chance8" type="number" min="0" max="100" step="0.1" disabled></label>
+        <label>大金触发概率 <input id="chance8" type="number" min="0" max="100" step="0.1" disabled></label>
       </div>
       <div class="settingBox">
         <h3>18.8r 档</h3>
-        <p>空白 2-4；金额 350W-500W；只允许瓦当。</p>
-        <label>瓦当概率 <input id="chance15" type="number" min="0" max="100" step="0.1"></label>
+        <p>空白 2-4；金额 350W-500W；允许大剑 / 龙舟送吉。</p>
+        <label>大金触发概率 <input id="chance15" type="number" min="0" max="100" step="0.1"></label>
+        <div class="row" style="margin-top:8px">
+          <label>大剑权重 <input id="w15sword" type="number" min="0" max="999"></label>
+          <label>龙舟送吉权重 <input id="w15longzhou" type="number" min="0" max="999"></label>
+        </div>
       </div>
       <div class="settingBox">
         <h3>28.8r 档</h3>
-        <p>空白 4-6；金额 650W-800W；允许瓦当/大剑/吞金兽。</p>
-        <label>大金概率 <input id="chance25" type="number" min="0" max="100" step="0.1"></label>
+        <p>空白 4-6；金额 650W-800W；允许大剑 / 龙舟送吉。</p>
+        <label>大金触发概率 <input id="chance25" type="number" min="0" max="100" step="0.1"></label>
         <div class="row" style="margin-top:8px">
-          <label>瓦当权重 <input id="w25wadang" type="number" min="0" max="999"></label>
           <label>大剑权重 <input id="w25sword" type="number" min="0" max="999"></label>
-          <label>吞金兽权重 <input id="w25tunjin" type="number" min="0" max="999"></label>
+          <label>龙舟送吉权重 <input id="w25longzhou" type="number" min="0" max="999"></label>
         </div>
       </div>
     </div>
@@ -189,9 +192,10 @@ async function loadSettings(){
   document.getElementById('chance8').value=s.itemChance["8"];
   document.getElementById('chance15').value=s.itemChance["15"];
   document.getElementById('chance25').value=s.itemChance["25"];
-  document.getElementById('w25wadang').value=s.itemWeights["25"].wadang;
+  document.getElementById('w15sword').value=s.itemWeights["15"].sword;
+  document.getElementById('w15longzhou').value=s.itemWeights["15"].longzhou;
   document.getElementById('w25sword').value=s.itemWeights["25"].sword;
-  document.getElementById('w25tunjin').value=s.itemWeights["25"].tunjin;
+  document.getElementById('w25longzhou').value=s.itemWeights["25"].longzhou;
 }
 
 async function saveSettings(){
@@ -203,11 +207,13 @@ async function saveSettings(){
         "25":Number(document.getElementById('chance25').value)||0
       },
       itemWeights:{
-        "15":{wadang:100},
+        "15":{
+          sword:Number(document.getElementById('w15sword').value)||0,
+          longzhou:Number(document.getElementById('w15longzhou').value)||0
+        },
         "25":{
-          wadang:Number(document.getElementById('w25wadang').value)||0,
           sword:Number(document.getElementById('w25sword').value)||0,
-          tunjin:Number(document.getElementById('w25tunjin').value)||0
+          longzhou:Number(document.getElementById('w25longzhou').value)||0
         }
       }
     };

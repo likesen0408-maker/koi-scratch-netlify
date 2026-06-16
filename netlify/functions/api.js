@@ -3,14 +3,17 @@ const crypto = require('crypto');
 
 const LEVELS = {
   8:  { price:'8.8r',  limit:8,  min:150, max:300, blanks:[1,2], itemAllowed:[] },
-  15: { price:'18.8r', limit:15, min:350, max:500, blanks:[2,4], itemAllowed:['wadang'] },
-  25: { price:'28.8r', limit:25, min:650, max:800, blanks:[4,6], itemAllowed:['wadang','sword','tunjin'] }
+  15: { price:'18.8r', limit:15, min:350, max:500, blanks:[2,4], itemAllowed:['sword','longzhou'] },
+  25: { price:'28.8r', limit:25, min:650, max:800, blanks:[4,6], itemAllowed:['sword','longzhou'] }
 };
 const MONEY_VALUES = [5,10,15,30,50,80,100,150,200];
-const ITEM_NAMES = { wadang:'瓦当', sword:'大剑', tunjin:'吞金兽', cup:'圣杯' };
+const ITEM_NAMES = { sword:'大剑', longzhou:'龙舟送吉', wadang:'瓦当', tunjin:'吞金兽', cup:'圣杯' };
 const DEFAULT_SETTINGS = {
   itemChance: { '8':0, '15':2, '25':4 },
-  itemWeights: { '15':{wadang:100}, '25':{wadang:50, sword:30, tunjin:20} },
+  itemWeights: {
+    '15':{ sword:100, longzhou:100 },
+    '25':{ sword:100, longzhou:100 }
+  },
   moneyWeights: Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1]))
 };
 
@@ -36,9 +39,9 @@ function normalizeSettings(s) {
     }
   }
   if (s && s.itemWeights) {
-    out.itemWeights['15'].wadang = clampWeight(s.itemWeights['15']?.wadang, out.itemWeights['15'].wadang);
-    for (const item of ['wadang','sword','tunjin']) {
-      out.itemWeights['25'][item] = clampWeight(s.itemWeights['25']?.[item], out.itemWeights['25'][item]);
+    for (const level of ['15','25']) {
+      out.itemWeights[level].sword = clampWeight(s.itemWeights[level]?.sword, out.itemWeights[level].sword);
+      out.itemWeights[level].longzhou = clampWeight(s.itemWeights[level]?.longzhou, out.itemWeights[level].longzhou);
     }
   }
   if (s && s.moneyWeights) {
@@ -81,7 +84,7 @@ function generateSequence(level, settings) {
   const chance = Number(settings.itemChance[String(level)] || 0);
   const itemMode = allowed.length && Math.random() * 100 < chance;
   if (itemMode) {
-    const item = level === 15 ? 'wadang' : weightedPick(settings.itemWeights[String(level)] || {}, allowed);
+    const item = weightedPick(settings.itemWeights[String(level)] || {}, allowed);
     const sequence = [{ type:item }, ...Array.from({length: cfg.limit - 1}, () => ({type:'blank'}))];
     shuffle(sequence);
     return { mode:'item', totalExpected:0, blankCount:cfg.limit - 1, item, sequence };
@@ -247,7 +250,7 @@ exports.handler = async (event) => {
 
       return jsonResp(200, {
         ok:true, redeemId:redeem.id, code:rec.code, level:rec.level, price:rec.price,
-        limit:rec.limit, sequence:draw.sequence, redeemedAtBeijing:redeem.redeemedAtBeijing,
+        limit:rec.limit, sequence:draw.sequence, item:draw.item, itemName, mode:draw.mode, redeemedAtBeijing:redeem.redeemedAtBeijing,
         remainingTickets:Math.max(0, rec.totalTickets - rec.usedTickets),
         totalTickets:rec.totalTickets, usedTickets:rec.usedTickets, expiresAt:rec.expiresAt
       });
