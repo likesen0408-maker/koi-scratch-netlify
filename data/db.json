@@ -1,0 +1,148 @@
+{
+  "codes": [
+    {
+      "code": "TEST188",
+      "level": 15,
+      "price": "18.8r",
+      "limit": 15,
+      "totalTickets": 5,
+      "usedTickets": 0,
+      "status": "unused",
+      "createdAt": "2026-06-16T00:00:00.000Z",
+      "createdAtBeijing": "2026-06-16 08:00:00",
+      "expiresAt": "2099-12-31T00:00:00.000Z",
+      "expiresAtBeijing": "2099-12-31 08:00:00"
+    },
+    {
+      "code": "TEST288",
+      "level": 25,
+      "price": "28.8r",
+      "limit": 25,
+      "totalTickets": 5,
+      "usedTickets": 0,
+      "status": "unused",
+      "createdAt": "2026-06-16T00:00:00.000Z",
+      "createdAtBeijing": "2026-06-16 08:00:00",
+      "expiresAt": "2099-12-31T00:00:00.000Z",
+      "expiresAtBeijing": "2099-12-31 08:00:00"
+    },
+    {
+      "code": "KOIRZAX3XEU8",
+      "level": 15,
+      "price": "18.8r",
+      "limit": 15,
+      "totalTickets": 1,
+      "usedTickets": 1,
+      "status": "used",
+      "createdAt": "2026-06-16T13:23:26.820Z",
+      "createdAtBeijing": "2026-06-16 21:23:26",
+      "expiresAt": "2026-06-23T13:23:26.820Z",
+      "expiresAtBeijing": "2026-06-23 21:23:26",
+      "usedAt": "2026-06-16T13:23:32.221Z",
+      "usedAtBeijing": "2026-06-16 21:23:32"
+    }
+  ],
+  "redeems": [
+    {
+      "id": "27db862c-4180-4907-b011-e419bed9cadb",
+      "code": "KOIRZAX3XEU8",
+      "level": 15,
+      "price": "18.8r",
+      "limit": 15,
+      "mode": "money",
+      "totalExpected": 442,
+      "blankCount": 4,
+      "item": null,
+      "itemName": "",
+      "summary": "金额奖励：442W；空白4格",
+      "sequence": [
+        {
+          "type": "money",
+          "value": 5
+        },
+        {
+          "type": "money",
+          "value": 30
+        },
+        {
+          "type": "money",
+          "value": 122
+        },
+        {
+          "type": "money",
+          "value": 30
+        },
+        {
+          "type": "blank"
+        },
+        {
+          "type": "money",
+          "value": 10
+        },
+        {
+          "type": "money",
+          "value": 10
+        },
+        {
+          "type": "money",
+          "value": 50
+        },
+        {
+          "type": "blank"
+        },
+        {
+          "type": "money",
+          "value": 150
+        },
+        {
+          "type": "money",
+          "value": 15
+        },
+        {
+          "type": "blank"
+        },
+        {
+          "type": "money",
+          "value": 10
+        },
+        {
+          "type": "money",
+          "value": 10
+        },
+        {
+          "type": "blank"
+        }
+      ],
+      "redeemedAt": "2026-06-16T13:23:32.222Z",
+      "redeemedAtBeijing": "2026-06-16 21:23:32"
+    }
+  ],
+  "settings": {
+    "itemChance": {
+      "8": 0,
+      "15": 20,
+      "25": 20
+    },
+    "itemWeights": {
+      "15": {
+        "sword": 100,
+        "longzhou": 100
+      },
+      "25": {
+        "sword": 100,
+        "longzhou": 100
+      }
+    },
+    "moneyWeights": {
+      "5": 1,
+      "10": 1,
+      "15": 1,
+      "30": 1,
+      "50": 1,
+      "80": 1,
+      "100": 1,
+      "150": 1,
+      "200": 1
+    }
+  }
+}

@@ -104,8 +104,9 @@
   .prizePage.show{display:block}
   .prizePage img{
     width:100%;
-    height:100%;
+    height:92.8%;
     object-fit:cover;
+    object-position:center top;
     display:block;
   }
   .stage.prize-mode .tagline,
@@ -135,7 +136,12 @@
     background:transparent !important;
   }
 
-  .stage.prize-mode .nav::before{
+  
+  /* v7 prize page bottom overlap fix */
+  .stage.prize-mode .prizePage{
+    background:linear-gradient(180deg,#f9dfe8 0%,#caf0db 100%);
+  }
+.stage.prize-mode .nav::before{
     content:'';
     position:absolute;
     left:-2%;
@@ -362,6 +368,123 @@
 
 
   .rewardAmount.bigPrizeText{font-size:calc(var(--stage-w)*.046)!important;line-height:1.25;color:#f45f92;text-shadow:0 2px 0 #fff;white-space:normal;padding:.15em 0}
+
+  /* v6 奖励弹窗字体：清晰明了 + 可爱风格，避免发虚 */
+  .rewardModal{
+    backdrop-filter:blur(3px) !important;
+    -webkit-backdrop-filter:blur(3px) !important;
+  }
+  .rewardBox{
+    width:min(88%,calc(var(--stage-w)*.84)) !important;
+    border-radius:30px !important;
+    padding:7.4% 6.5% 6.6% !important;
+    border:3px solid #ff9fc2 !important;
+    background:
+      radial-gradient(circle at 12% 10%,rgba(255,231,240,.92),rgba(255,255,255,0) 34%),
+      radial-gradient(circle at 90% 14%,rgba(233,255,224,.90),rgba(255,255,255,0) 34%),
+      linear-gradient(180deg,rgba(255,254,250,.98),rgba(255,248,252,.99)) !important;
+    box-shadow:0 16px 38px rgba(218,91,131,.18), inset 0 2px 0 rgba(255,255,255,.95) !important;
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    -webkit-font-smoothing:antialiased !important;
+    -moz-osx-font-smoothing:grayscale !important;
+    text-rendering:optimizeLegibility !important;
+  }
+  .rewardBox:after{
+    content:'🍀';
+    position:absolute;
+    right:7.2%;
+    top:6.2%;
+    font-size:clamp(18px,calc(var(--stage-w)*.042),28px);
+    opacity:.9;
+    filter:none !important;
+  }
+  .rewardTitle{
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(25px,calc(var(--stage-w)*.066),36px) !important;
+    line-height:1.15 !important;
+    font-weight:900 !important;
+    color:#ff5f9b !important;
+    letter-spacing:.04em !important;
+    -webkit-text-stroke:0 !important;
+    text-shadow:0 1px 0 #fff,0 3px 8px rgba(255,118,166,.18) !important;
+    white-space:nowrap !important;
+  }
+  .rewardLevel{
+    margin-top:3.8% !important;
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(15px,calc(var(--stage-w)*.039),22px) !important;
+    line-height:1.25 !important;
+    font-weight:800 !important;
+    color:#48a84f !important;
+    letter-spacing:.03em !important;
+    -webkit-text-stroke:0 !important;
+    text-shadow:0 1px 0 rgba(255,255,255,.95) !important;
+    white-space:nowrap !important;
+  }
+  .rewardAmount{
+    margin-top:6.4% !important;
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(33px,calc(var(--stage-w)*.082),45px) !important;
+    line-height:1.15 !important;
+    font-weight:950 !important;
+    color:#ff5f9b !important;
+    letter-spacing:.01em !important;
+    -webkit-text-stroke:0 !important;
+    text-shadow:0 1px 0 #fff,0 4px 10px rgba(255,118,166,.16) !important;
+  }
+  .rewardAmount.bigPrizeText{
+    font-size:clamp(30px,calc(var(--stage-w)*.073),42px) !important;
+    line-height:1.2 !important;
+    font-weight:950 !important;
+    color:#ff5f9b !important;
+    letter-spacing:.02em !important;
+    text-shadow:0 1px 0 #fff,0 4px 10px rgba(255,118,166,.16) !important;
+    white-space:nowrap !important;
+  }
+  .rewardSub{
+    margin-top:2.8% !important;
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(17px,calc(var(--stage-w)*.044),24px) !important;
+    line-height:1.25 !important;
+    font-weight:850 !important;
+    color:#80694f !important;
+    letter-spacing:.035em !important;
+    text-shadow:0 1px 0 rgba(255,255,255,.95) !important;
+  }
+  .rewardTools{
+    margin-top:5.5% !important;
+    padding:4.4% 5.4% !important;
+    border-radius:20px !important;
+    border:2px solid rgba(193,232,174,.95) !important;
+    background:linear-gradient(180deg,#f8fff3 0%,#f1fde9 100%) !important;
+    box-shadow:0 5px 12px rgba(97,160,80,.08), inset 0 1px 0 #fff !important;
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(18px,calc(var(--stage-w)*.047),26px) !important;
+    line-height:1.35 !important;
+    color:#3fa550 !important;
+    font-weight:900 !important;
+    text-shadow:none !important;
+  }
+  .rewardTools strong{
+    color:#3fa550 !important;
+    font-weight:900 !important;
+  }
+  .rewardNote{
+    margin-top:4% !important;
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(14px,calc(var(--stage-w)*.033),19px) !important;
+    line-height:1.55 !important;
+    color:#937f76 !important;
+    font-weight:700 !important;
+    text-shadow:none !important;
+  }
+  .rewardBtn{
+    font-family:"PingFang SC","Microsoft YaHei","Source Han Sans SC",Arial,sans-serif !important;
+    font-size:clamp(17px,calc(var(--stage-w)*.043),24px) !important;
+    font-weight:900 !important;
+    padding:4.8% 0 !important;
+  }
+
 </style>
 </head>
 <body>
@@ -593,7 +716,7 @@ function openRewardModal(){
   $('rewardAmountText').classList.toggle('bigPrizeText', !!isBigPrize);
   $('rewardSub').textContent=isBigPrize ? '大金奖励单独兑换' : '本局累计金额奖励';
   $('rewardToolsText').innerHTML=isBigPrize ? `<strong>大金奖励：</strong>${tools.length?tools.join('、'):(currentItemName||'大剑')}` : '<strong>大金奖励：</strong>暂无，继续好运加倍～';
-  $('rewardNoteText').textContent=remainingTickets>0 ? `当前兑换码还可继续刮 ${remainingTickets} 张，点左侧按钮直接开启下一张。` : (isBigPrize?'本局大金奖励已触发，请复制结果发给客服。':'本局金额奖励已自动统计，可以继续复制结果发给客服。');
+  $('rewardNoteText').textContent=remainingTickets>0 ? `当前兑换码还可继续刮 ${remainingTickets} 张，点击继续下一张。` : (isBigPrize?'本局大金奖励已触发，请复制结果发给客服。':'本局金额奖励已自动统计，可以继续复制结果发给客服。');
   $('rewardCloseBtn').textContent=remainingTickets>0 ? `继续下一张(${remainingTickets})` : '再兑一张';
   $('rewardModal').classList.add('show');
 }

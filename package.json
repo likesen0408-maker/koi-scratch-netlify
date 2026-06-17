@@ -1,11 +1,8 @@
 {
-  "name": "koi-scratch-netlify",
+  "name": "koi-scratch-local-test-v5",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo \"No build step\""
-  },
-  "dependencies": {
-    "@netlify/blobs": "latest"
+    "start": "node server.js"
   }
 }
