@@ -485,9 +485,135 @@
     padding:4.8% 0 !important;
   }
 
+
+  /* v8 手机/平板自适应：使用真实可视窗口高度，避免 iPad/微信浏览器底部被裁切 */
+  :root{
+    --app-h:100dvh;
+    --app-w:100vw;
+    --stage-w:min(var(--app-w), calc(var(--app-h) * 9 / 16));
+    --stage-h:var(--app-h);
+  }
+  html,body{
+    width:100%;
+    min-height:var(--app-h);
+    height:var(--app-h);
+    overflow:hidden!important;
+  }
+  body{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    padding:0!important;
+  }
+  .stage{
+    width:var(--stage-w)!important;
+    height:var(--stage-h)!important;
+    max-width:none!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+  }
+
+  /* 极窄长屏：优先铺满宽度，允许页面自身上下一点点安全留白 */
+  @media (max-aspect-ratio: 9/17){
+    :root{
+      --stage-w:100vw;
+      --stage-h:calc(100vw * 16 / 9);
+    }
+    html,body{
+      height:100%;
+      min-height:100%;
+      overflow-y:auto!important;
+      overflow-x:hidden!important;
+    }
+    body{
+      align-items:flex-start!important;
+    }
+  }
+
+  /* 平板横屏/宽屏：保持完整 9:16 舞台，左右自动留粉色背景，不裁切内容 */
+  @media (min-aspect-ratio: 3/2){
+    :root{
+      --stage-w:calc(var(--app-h) * 9 / 16);
+      --stage-h:var(--app-h);
+    }
+  }
+
+  /* v8 奖池页：图片区域预留底部导航，不再被导航挡住 */
+  .prizePage{
+    background:linear-gradient(180deg,#f8deea 0%,#c9f0dc 100%)!important;
+  }
+  .prizePage img{
+    position:absolute!important;
+    left:0!important;
+    top:0!important;
+    width:100%!important;
+    height:calc(100% - 7.2%)!important;
+    object-fit:contain!important;
+    object-position:center top!important;
+    display:block!important;
+  }
+  .stage.prize-mode .nav{
+    bottom:0.65%!important;
+  }
+
+
+  /* v11 平板进一步防遮挡：缩小刮卡区并整体上提下方控件 */
+  @media (min-width: 720px){
+    .logo{left:8.2%!important;top:1.0%!important;width:24.6%!important}
+    .title{left:16.0%!important;top:5.6%!important;width:67.0%!important}
+    .mainKoi{left:9.2%!important;top:20.2%!important;width:15.6%!important}
+    .badge{right:6.0%!important;top:19.5%!important;width:20.8%!important}
+    .ribbon{left:24.4%!important;top:26.9%!important;width:51.4%!important}
+    .tagline{left:24.2%!important;top:30.7%!important;width:51.6%!important;height:2.8%!important;font-size:calc(var(--stage-w)*.0195)!important}
+    .statusRow{left:24.7%!important;top:33.7%!important;width:50.6%!important;height:3.05%!important}
+    .status{font-size:calc(var(--stage-w)*.0215)!important}
+    .panel{left:15.5%!important;top:36.0%!important;width:69.0%!important}
+    .grid{left:7.7%!important;top:8.5%!important;width:84.6%!important;height:82.7%!important;gap:2.0%!important}
+    .summary{left:13.9%!important;top:78.35%!important;width:72.2%!important;height:3.9%!important;padding:0 5.8%!important}
+    .summary .label{font-size:calc(var(--stage-w)*.0185)!important}
+    .summary .num{font-size:calc(var(--stage-w)*.0295)!important}
+    .summary .right{font-size:calc(var(--stage-w)*.0132)!important}
+    .options{left:14.6%!important;top:83.35%!important;width:70.8%!important;height:4.55%!important;gap:3.6%!important}
+    .mainBtn{left:28.0%!important;top:88.75%!important;width:44.0%!important;height:4.7%!important}
+    .nav{left:8.1%!important;bottom:0.25%!important;width:83.8%!important;height:5.15%!important}
+  }
+
+  @media (min-width: 900px) and (orientation: landscape){
+    .panel{left:17.0%!important;top:35.8%!important;width:66.0%!important}
+    .summary{top:78.0%!important}
+    .options{top:83.0%!important}
+    .mainBtn{top:88.35%!important}
+  }
+
+  @media (min-width:720px){
+    .prizePage img{
+      height:calc(100% - 7.2%)!important;
+      object-fit:contain!important;
+      object-position:center top!important;
+    }
+  }
+
 </style>
 </head>
 <body>
+<script>
+(function(){
+  function setAppSize(){
+    var vv = window.visualViewport;
+    var h = Math.max(320, Math.floor(vv ? vv.height : window.innerHeight));
+    var w = Math.max(240, Math.floor(vv ? vv.width : window.innerWidth));
+    document.documentElement.style.setProperty('--app-h', h + 'px');
+    document.documentElement.style.setProperty('--app-w', w + 'px');
+  }
+  setAppSize();
+  window.addEventListener('resize', setAppSize, {passive:true});
+  window.addEventListener('orientationchange', function(){ setTimeout(setAppSize, 250); }, {passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', setAppSize, {passive:true});
+    window.visualViewport.addEventListener('scroll', setAppSize, {passive:true});
+  }
+})();
+</script>
 <div class="stage locked" id="stage">
   <img class="bg" id="bg" alt="背景">
   <img class="logo" id="logo" alt="Koi Club">

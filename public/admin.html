@@ -62,6 +62,16 @@ a{color:var(--pink);font-weight:1000;text-decoration:none}
 .copyText{width:100%;min-height:54px;border:1.5px solid #ffc3d6;border-radius:16px;background:#fff;color:#f45f92;font-size:17px;font-weight:1000;letter-spacing:.04em;text-align:center;user-select:text;-webkit-user-select:text}
 .copyBox .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 
+
+  /* v12 后台每档金额权重设置 */
+  .moneySection{margin-top:16px;padding:14px;border-radius:18px;background:rgba(255,249,252,.92);border:1.5px solid rgba(255,150,185,.38)}
+  .moneySection h3{margin:0 0 8px;color:#f35f91;font-size:19px}
+  .moneySection p{margin:0 0 10px}
+  .moneyGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .moneyGrid label{font-size:13px;background:#fff;border:1px solid rgba(102,178,103,.18);border-radius:12px;padding:8px 8px 6px}
+  .moneyGrid input{margin-top:4px}
+  @media(max-width:520px){.moneyGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.moneySection{padding:12px}}
+
 </style>
 </head>
 <body>
@@ -122,6 +132,13 @@ a{color:var(--pink);font-weight:1000;text-decoration:none}
         </div>
       </div>
     </div>
+    
+    <div class="moneySection">
+      <h3>每档累计金额段权重</h3>
+      <p class="small">数值越大越容易出，填 0 表示该金额尽量不出。8.8r、18.8r、28.8r 三个档位可以分开设置。</p>
+      <div id="bandWeightEditor"></div>
+    </div>
+
     <p><button onclick="saveSettings()">保存概率设置</button></p>
   </div>
 
@@ -186,6 +203,40 @@ function fmt(t){return t?new Date(t).toLocaleString('zh-CN',{hour12:false}):''}
 function fmtB(t,b){return b||fmt(t)}
 function modeText(r){return r.summary || (r.mode==='item' ? '大金奖励：'+(r.itemName||r.item||'')+'；其余空白' : '金额：'+(r.totalExpected||0)+'W / 空白'+(r.blankCount||0));}
 
+
+const TOTAL_BANDS={
+  "8":[{"id":"100","label":"100多W","range":"150-199W"},{"id":"200","label":"200多W","range":"200-299W"},{"id":"300","label":"300W","range":"300W"}],
+  "15":[{"id":"300","label":"300多W","range":"350-399W"},{"id":"400","label":"400多W","range":"400-499W"},{"id":"500","label":"500W","range":"500W"}],
+  "25":[{"id":"600","label":"600多W","range":"650-699W"},{"id":"700","label":"700多W","range":"700-799W"},{"id":"800","label":"800W","range":"800W"}]
+};
+const MONEY_LEVELS=[["8","8.8r"],["15","18.8r"],["25","28.8r"]];
+
+function renderMoneyWeightEditor(settings){
+  const box=document.getElementById('bandWeightEditor');
+  if(!box)return;
+  box.innerHTML=MONEY_LEVELS.map(([level,label])=>{
+    const weights=(settings.totalBandWeights && settings.totalBandWeights[level]) || {};
+    return `<div class="moneySection" style="margin-top:10px;background:rgba(242,255,239,.74)">
+      <h3>${label} 累计金额段</h3>
+      <div class="moneyGrid">
+        ${TOTAL_BANDS[level].map(b=>`<label>${b.label}<span style="display:block;font-size:11px;color:#8aa57a;margin-top:2px">${b.range}</span><input id="bw${level}_${b.id}" type="number" min="0" max="999" value="${Number(weights[b.id] ?? 1)}"></label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function collectTotalBandWeights(){
+  const out={};
+  MONEY_LEVELS.forEach(([level])=>{
+    out[level]={};
+    TOTAL_BANDS[level].forEach(b=>{
+      const el=document.getElementById(`bw${level}_${b.id}`);
+      out[level][b.id]=Number(el && el.value)||0;
+    });
+  });
+  return out;
+}
+
 async function loadSettings(){
   const data=await api('/api/admin/settings');
   const s=data.settings;
@@ -196,6 +247,7 @@ async function loadSettings(){
   document.getElementById('w15longzhou').value=s.itemWeights["15"].longzhou;
   document.getElementById('w25sword').value=s.itemWeights["25"].sword;
   document.getElementById('w25longzhou').value=s.itemWeights["25"].longzhou;
+  renderMoneyWeightEditor(s);
 }
 
 async function saveSettings(){
@@ -215,7 +267,8 @@ async function saveSettings(){
           sword:Number(document.getElementById('w25sword').value)||0,
           longzhou:Number(document.getElementById('w25longzhou').value)||0
         }
-      }
+      },
+      totalBandWeights:collectTotalBandWeights()
     };
     await api('/api/admin/settings',{method:'POST',body:JSON.stringify({settings})});
     showToast('概率设置已保存');

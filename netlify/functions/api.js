@@ -7,6 +7,23 @@ const LEVELS = {
   25: { price:'28.8r', limit:25, min:650, max:800, blanks:[4,6], itemAllowed:['sword','longzhou'] }
 };
 const MONEY_VALUES = [5,10,15,30,50,80,100,150,200];
+const TOTAL_BANDS = {
+  '8': [
+    { id:'100', label:'100多W', min:150, max:199 },
+    { id:'200', label:'200多W', min:200, max:299 },
+    { id:'300', label:'300W', min:300, max:300 }
+  ],
+  '15': [
+    { id:'300', label:'300多W', min:350, max:399 },
+    { id:'400', label:'400多W', min:400, max:499 },
+    { id:'500', label:'500W', min:500, max:500 }
+  ],
+  '25': [
+    { id:'600', label:'600多W', min:650, max:699 },
+    { id:'700', label:'700多W', min:700, max:799 },
+    { id:'800', label:'800W', min:800, max:800 }
+  ]
+};
 const ITEM_NAMES = { sword:'大剑', longzhou:'龙舟送吉', wadang:'瓦当', tunjin:'吞金兽', cup:'圣杯' };
 const DEFAULT_SETTINGS = {
   itemChance: { '8':0, '15':2, '25':4 },
@@ -14,7 +31,11 @@ const DEFAULT_SETTINGS = {
     '15':{ sword:100, longzhou:100 },
     '25':{ sword:100, longzhou:100 }
   },
-  moneyWeights: Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1]))
+  moneyWeights: {
+    '8': Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1])),
+    '15': Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1])),
+    '25': Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1]))
+  }
 };
 
 function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
@@ -44,8 +65,12 @@ function normalizeSettings(s) {
       out.itemWeights[level].longzhou = clampWeight(s.itemWeights[level]?.longzhou, out.itemWeights[level].longzhou);
     }
   }
-  if (s && s.moneyWeights) {
-    for (const v of MONEY_VALUES) out.moneyWeights[String(v)] = clampWeight(s.moneyWeights[String(v)], out.moneyWeights[String(v)]);
+  if (s && s.totalBandWeights) {
+    for (const level of ['8','15','25']) {
+      for (const band of TOTAL_BANDS[level]) {
+        out.totalBandWeights[level][band.id] = clampWeight(s.totalBandWeights[level]?.[band.id], out.totalBandWeights[level][band.id]);
+      }
+    }
   }
   return out;
 }
@@ -59,24 +84,56 @@ function weightedPick(weights, allowed) {
   for (const [k,w] of entries) { r -= w; if (r <= 0) return k; }
   return entries[entries.length - 1][0];
 }
-function buildMoneyPrizes(level) {
+function weightedPickMoney(weights, candidates) {
+  const entries = candidates.map(v => [v, Math.max(0, Number(weights[String(v)] || 0))]).filter(([,w]) => w > 0);
+  if (!entries.length) return candidates[rnd(0, candidates.length - 1)];
+  const total = entries.reduce((s, [,w]) => s + w, 0);
+  let r = Math.random() * total;
+  for (const [v,w] of entries) { r -= w; if (r <= 0) return v; }
+  return entries[entries.length - 1][0];
+}
+
+function pickWeightedBand(level, settings) {
+  const bands = TOTAL_BANDS[String(level)] || [];
+  const weights = (settings && settings.totalBandWeights && settings.totalBandWeights[String(level)]) ? settings.totalBandWeights[String(level)] : {};
+  const entries = bands.map(b => [b, Math.max(0, Number(weights[b.id] || 0))]).filter(([,w]) => w > 0);
+  const usable = entries.length ? entries : bands.map(b => [b, 1]);
+  const total = usable.reduce((s, [,w]) => s + w, 0);
+  let r = Math.random() * total;
+  for (const [band,w] of usable) { r -= w; if (r <= 0) return band; }
+  return usable[usable.length - 1][0];
+}
+function pickTotalForLevel(level, settings) {
+  const band = pickWeightedBand(level, settings);
+  const min = Math.ceil(band.min / 5) * 5;
+  const max = Math.floor(band.max / 5) * 5;
+  return rnd(min / 5, max / 5) * 5;
+}
+function buildValuesForTarget(target, count) {
+  const values = [];
+  let remaining = target;
+  for (let i = 0; i < count; i++) {
+    const left = count - i - 1;
+    const candidates = MONEY_VALUES.filter(v => remaining - v >= left * 5 && remaining - v <= left * 200);
+    const usable = candidates.length ? candidates : [5];
+    const v = usable[rnd(0, usable.length - 1)];
+    values.push(v);
+    remaining -= v;
+  }
+  if (remaining !== 0 && values.length) values[values.length - 1] += remaining;
+  return values;
+}
+
+function buildMoneyPrizes(level, settings) {
   const cfg = LEVELS[level];
   const blankCount = rnd(cfg.blanks[0], cfg.blanks[1]);
   const moneyCount = cfg.limit - blankCount;
-  let remaining = rnd(cfg.min, cfg.max);
-  const prizes = [];
-  for (let i=0; i<moneyCount; i++) {
-    const left = moneyCount - i - 1;
-    let candidates = MONEY_VALUES.filter(v => v <= remaining - left * 5);
-    if (!candidates.length) candidates = [5];
-    let v = candidates[rnd(0, candidates.length - 1)];
-    prizes.push({ type:'money', value:v });
-    remaining -= v;
-  }
-  if (remaining > 0 && prizes.length) prizes[prizes.length - 1].value += remaining;
+  const targetTotal = pickTotalForLevel(level, settings);
+  const values = buildValuesForTarget(targetTotal, moneyCount);
+  const prizes = values.map(v => ({ type:'money', value:v }));
   const sequence = [...prizes, ...Array.from({length:blankCount}, () => ({type:'blank'}))];
   shuffle(sequence);
-  return { mode:'money', totalExpected: prizes.reduce((s,p)=>s+Number(p.value||0),0), blankCount, item:null, sequence };
+  return { mode:'money', totalExpected: values.reduce((a,b)=>a+Number(b||0),0), blankCount, item:null, sequence };
 }
 function generateSequence(level, settings) {
   const cfg = LEVELS[level];
@@ -89,7 +146,7 @@ function generateSequence(level, settings) {
     shuffle(sequence);
     return { mode:'item', totalExpected:0, blankCount:cfg.limit - 1, item, sequence };
   }
-  return buildMoneyPrizes(level);
+  return buildMoneyPrizes(level, settings);
 }
 function makeCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -197,6 +254,8 @@ exports.handler = async (event) => {
       const db = await getDb();
       const rec = db.codes.find(c => c.code === code);
       if (!rec) return jsonResp(404, { error:'兑换码不存在' });
+    rec.totalTickets = Math.max(1, Math.min(Number(rec.totalTickets) || 1, 999));
+    rec.usedTickets = Math.max(0, Number(rec.usedTickets) || 0);
       rec.status = 'void';
       rec.voidedAt = new Date().toISOString();
       rec.voidedAtBeijing = beijingTime(rec.voidedAt);
