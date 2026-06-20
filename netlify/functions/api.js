@@ -31,6 +31,11 @@ const DEFAULT_SETTINGS = {
     '15':{ sword:100, longzhou:100 },
     '25':{ sword:100, longzhou:100 }
   },
+  totalBandWeights: {
+    '8': { '100':1, '200':1, '300':1 },
+    '15': { '300':1, '400':1, '500':1 },
+    '25': { '600':1, '700':1, '800':1 }
+  },
   moneyWeights: {
     '8': Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1])),
     '15': Object.fromEntries(MONEY_VALUES.map(v=>[String(v),1])),
@@ -65,10 +70,18 @@ function normalizeSettings(s) {
       out.itemWeights[level].longzhou = clampWeight(s.itemWeights[level]?.longzhou, out.itemWeights[level].longzhou);
     }
   }
+  if (!out.totalBandWeights) {
+    out.totalBandWeights = {
+      '8': { '100':1, '200':1, '300':1 },
+      '15': { '300':1, '400':1, '500':1 },
+      '25': { '600':1, '700':1, '800':1 }
+    };
+  }
   if (s && s.totalBandWeights) {
     for (const level of ['8','15','25']) {
+      if (!out.totalBandWeights[level]) out.totalBandWeights[level] = {};
       for (const band of TOTAL_BANDS[level]) {
-        out.totalBandWeights[level][band.id] = clampWeight(s.totalBandWeights[level]?.[band.id], out.totalBandWeights[level][band.id]);
+        out.totalBandWeights[level][band.id] = clampWeight(s.totalBandWeights[level]?.[band.id], out.totalBandWeights[level][band.id] ?? 1);
       }
     }
   }
@@ -274,6 +287,8 @@ exports.handler = async (event) => {
       const rec = db.codes.find(c => c.code === code);
       if (!rec) return jsonResp(404, { error:'兑换码不存在' });
       if (rec.status === 'void') return jsonResp(400, { error:'兑换码已作废' });
+      rec.totalTickets = Math.max(1, Math.min(Number(rec.totalTickets) || 1, 999));
+      rec.usedTickets = Math.max(0, Math.min(Number(rec.usedTickets) || 0, rec.totalTickets));
       if (new Date(rec.expiresAt).getTime() < Date.now()) {
         rec.status = 'expired';
         await saveDb(db);

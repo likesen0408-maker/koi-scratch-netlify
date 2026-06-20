@@ -237,9 +237,27 @@ function collectTotalBandWeights(){
   return out;
 }
 
+
+function ensureSettingsShape(s){
+  s=s||{};
+  s.itemChance=s.itemChance||{"8":0,"15":2,"25":4};
+  s.itemWeights=s.itemWeights||{"15":{sword:100,longzhou:100},"25":{sword:100,longzhou:100}};
+  s.itemWeights["15"]=s.itemWeights["15"]||{sword:100,longzhou:100};
+  s.itemWeights["25"]=s.itemWeights["25"]||{sword:100,longzhou:100};
+  s.totalBandWeights=s.totalBandWeights||{
+    "8":{"100":1,"200":1,"300":1},
+    "15":{"300":1,"400":1,"500":1},
+    "25":{"600":1,"700":1,"800":1}
+  };
+  s.totalBandWeights["8"]=s.totalBandWeights["8"]||{"100":1,"200":1,"300":1};
+  s.totalBandWeights["15"]=s.totalBandWeights["15"]||{"300":1,"400":1,"500":1};
+  s.totalBandWeights["25"]=s.totalBandWeights["25"]||{"600":1,"700":1,"800":1};
+  return s;
+}
+
 async function loadSettings(){
   const data=await api('/api/admin/settings');
-  const s=data.settings;
+  const s=ensureSettingsShape(data.settings);
   document.getElementById('chance8').value=s.itemChance["8"];
   document.getElementById('chance15').value=s.itemChance["15"];
   document.getElementById('chance25').value=s.itemChance["25"];
